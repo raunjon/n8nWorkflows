@@ -9,7 +9,7 @@ A collection of advanced n8n workflows that leverage RAG (Retrieval-Augmented Ge
 File: PDFTextCourseRAGWorkflow/Course_RAG.json
 A comprehensive RAG system for processing educational PDF documents and creating an intelligent Q&A system.
 
-Features:
+#### Features:
 
 Downloads PDF files from Google Drive
 Extracts and chunks text content
@@ -25,7 +25,7 @@ Use Case: Transform course materials into an intelligent tutoring system
 File: PMIntterviewSimulatorWorkflow/PMInterview-RAG.json
 An AI-powered Product Manager interview preparation system that conducts realistic mock interviews.
 
-Features:
+#### Features:
 
 Processes YouTube PM interview transcripts
 Categorizes questions by type, frameworks, and skills tested
@@ -42,7 +42,7 @@ Use Case: Prepare for PM interviews with personalized, realistic practice sessio
 File: PMJobHunterWorkflow/Job Agent.json
 An intelligent job search automation system that finds, analyzes, and applies to relevant positions.
 
-Features:
+#### Features:
 
 Monitors RSS feeds for job postings
 AI-powered job compatibility scoring
@@ -56,9 +56,10 @@ Use Case: Automate job searching and application processes
 
 ### 📺 YouTube Playlist RAG
 File: PlaylistYouTubeRagWorkflow/YouTube-Contextual-RAG.json
+
 A comprehensive system for processing multiple YouTube videos into a searchable knowledge base.
 
-Features:
+#### Features:
 
 Processes multiple YouTube video transcripts
 Extracts and cleans video descriptions
@@ -74,7 +75,7 @@ Use Case: Create searchable knowledge bases from YouTube educational content
 File: RedditSentimentAnalyserWorkflow/Reddit - Sentiment.json
 An intelligent sentiment analysis system that monitors Reddit discussions about specific topics.
 
-Features:
+#### Features:
 
 Searches Reddit for topic-specific posts
 Filters high-quality posts by upvotes
@@ -90,7 +91,7 @@ Use Case: Monitor public opinion and sentiment about products, brands, or topics
 File: SingleYouTubeRAGWorkflow/YouTube-Single-Contextual-RAG.json
 A focused RAG system for processing individual YouTube videos with high accuracy.
 
-Features:
+#### Features:
 
 Form-based video URL input
 Single video transcript processing
