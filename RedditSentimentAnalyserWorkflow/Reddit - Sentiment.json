@@ -1,0 +1,878 @@
+{
+  "name": "Reddit - Sentiment",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "search",
+        "location": "allReddit",
+        "keyword": "={{ $json.chatInput }}",
+        "limit": 30,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -416
+      ],
+      "id": "3de45fbf-7831-4f94-b51a-c280e3673a56",
+      "name": "Search for a post",
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "sPgd8BswPQKoKNBQ",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6093c05c-caf9-4ec0-8252-28dd625200f0",
+              "leftValue": "={{ $json.ups }}",
+              "rightValue": 50,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        -416
+      ],
+      "id": "722a13f6-9e2e-4e2b-8694-a142dff60fa9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5896dbc-bb95-4957-9c9c-a58097e3c41b",
+              "name": "author_fullname",
+              "value": "={{ $json.author_fullname }}",
+              "type": "string"
+            },
+            {
+              "id": "d374e0e8-a78d-4e8d-96a6-df5a83f00ce3",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "7cb476ab-47fd-44fe-a6e4-c9d8422c748b",
+              "name": "subreddit_name_prefixed",
+              "value": "={{ $json.subreddit_name_prefixed }}",
+              "type": "string"
+            },
+            {
+              "id": "7c96dee0-9382-47ea-8edf-e25f37eef550",
+              "name": "upvote_ratio",
+              "value": "={{ $json.upvote_ratio }}",
+              "type": "number"
+            },
+            {
+              "id": "6683a7f4-c211-4f43-8080-9de65a5b8917",
+              "name": "ups",
+              "value": "={{ $json.ups }}",
+              "type": "number"
+            },
+            {
+              "id": "86ad41c7-558c-47ef-ba8b-1672c58d7c18",
+              "name": "selftext",
+              "value": "={{ $json.selftext }}",
+              "type": "string"
+            },
+            {
+              "id": "6e8d8cc3-973b-48c4-b900-63396c353768",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        -416
+      ],
+      "id": "f7f60f5c-2599-4fd6-991a-9ba20aefc113",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Reddit Post: {{$json.title}}\n{{ $json.selftext }}\nTask: Extract opinions and critiques about {{$('When chat message received').item.json.chatInput}}.\n\nYour output should be: \nrelevance – true only if the post’s primary intent is to give a direct opinion or critique of {{$('When chat message received').item.json.chatInput}}; otherwise false (mark false even when the topic is merely mentioned).\nsentiment_score (1-5, how positive is the opinion of the post about the top, 0 if relevance is false)\nkey_points: (text, 3 sentences at max, blank if relevance is false)\nkey_words: (csv,text, some of the keywords identified, blank if relevance is false)",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        864,
+        -416
+      ],
+      "id": "cc60b009-ade5-4176-91ce-2ba60bd52470",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -192
+      ],
+      "id": "32beef22-afbd-48bc-b088-7a0a2840d729",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -192
+      ],
+      "id": "98513b2d-d3c8-47a3-b17b-8616fc278a67",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "Key Points",
+              "renameField": true,
+              "outputFieldName": "combined"
+            },
+            {
+              "fieldToAggregate": "Score",
+              "renameField": true,
+              "outputFieldName": "score"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        -416
+      ],
+      "id": "aff9d6fd-5876-4682-8990-6b92da39ba9e",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"relevance\": true,\n\t\"key_points\": \"\",\n  \"key_words\":\"\",\n  \"sentiment_score\":\"\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        -192
+      ],
+      "id": "772a8462-1049-44e0-a946-19e9dae75ff0",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1yd5fEYKhxNgjDkOaDvzvMkKfr-wonVrfHC7JrUc1Ja0",
+          "mode": "list",
+          "cachedResultName": "Opinions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yd5fEYKhxNgjDkOaDvzvMkKfr-wonVrfHC7JrUc1Ja0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 211349147,
+          "mode": "list",
+          "cachedResultName": "Raw",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yd5fEYKhxNgjDkOaDvzvMkKfr-wonVrfHC7JrUc1Ja0/edit#gid=211349147"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $('Edit Fields').item.json.title }}",
+            "ID": "={{ $('Edit Fields').item.json.url }}",
+            "Upvotes": "={{ $('Edit Fields').item.json.ups }}",
+            "Subreddit": "={{ $('Edit Fields').item.json.subreddit_name_prefixed }}",
+            "Upvote Ratio": "={{ $('Edit Fields').item.json.upvote_ratio }}",
+            "Body": "={{ $('Edit Fields').item.json.selftext }}",
+            "Topic": "={{ $('When chat message received').item.json.chatInput }}",
+            "Relevance": "={{ $json.output.relevance }}",
+            "Score": "={{ $json.output.sentiment_score }}",
+            "Key Words": "={{ $json.output.key_words }}",
+            "Key Points": "={{ $json.output.key_points }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subreddit",
+              "displayName": "Subreddit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Upvotes",
+              "displayName": "Upvotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Upvote Ratio",
+              "displayName": "Upvote Ratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Body",
+              "displayName": "Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Response",
+              "displayName": "AI Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Relevance",
+              "displayName": "Relevance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Key Words",
+              "displayName": "Key Words",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Key Points",
+              "displayName": "Key Points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1520,
+        -416
+      ],
+      "id": "82d4bf9e-b334-4b6b-8bbf-a2fe513ad132",
+      "name": "Append or update row in sheet",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fc0e4a1c-7acb-4508-8881-3ca1b4f22891",
+              "leftValue": "={{ $json.output.relevance }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1296,
+        -416
+      ],
+      "id": "36c5f255-bc3d-4441-81fb-fb80acefa3b0",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yd5fEYKhxNgjDkOaDvzvMkKfr-wonVrfHC7JrUc1Ja0",
+          "mode": "list",
+          "cachedResultName": "Opinions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yd5fEYKhxNgjDkOaDvzvMkKfr-wonVrfHC7JrUc1Ja0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Summary",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yd5fEYKhxNgjDkOaDvzvMkKfr-wonVrfHC7JrUc1Ja0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{$now}}",
+            "Topic": "={{ $('When chat message received').item.json.chatInput }}",
+            "Score (Avg)": "={{ $('Aggregate').item.json.score.reduce((s, v) => s + Number(v), 0) / $('Aggregate').item.json.score.length}}",
+            "Key Points": "={{ $json.output.combined_points }}",
+            "Key Words": "={{ $json.output.combined_keywords }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score (Avg)",
+              "displayName": "Score (Avg)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Key Words",
+              "displayName": "Key Words",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Key Points",
+              "displayName": "Key Points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2368,
+        -416
+      ],
+      "id": "0b3c2232-10c1-4415-a9c7-06cb261eb848",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Combined Problems: {{ $json.combined }}\n\nHere is a summary of all the problems stated by the users of reddit, on the topic: {{ $('When chat message received').item.json.chatInput }}. Summarise the problem stated in two paragraphs, identify keywords, list them down. \n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        1968,
+        -416
+      ],
+      "id": "971ff38b-9e54-48e2-86f3-181f6b596a6d",
+      "name": "Summary Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        -192
+      ],
+      "id": "c2f181dd-eca8-4a5d-8252-f96f12a5af15",
+      "name": "Think1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"combined_points\": \"California\",\n\t\"combined_keywords\": \"\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2128,
+        -192
+      ],
+      "id": "84ca6aa0-d595-4998-aaef-434c94e5e380",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://panel.thirtyplus.tech/api/whatsapp_messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-GB,en-US;q=0.9,en;q=0.8"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Origin",
+              "value": "https://panel.thirtyplus.tech"
+            },
+            {
+              "name": "Referer",
+              "value": "https://panel.thirtyplus.tech/whatsapp_conversations"
+            },
+            {
+              "name": "Sec-Fetch-Dest",
+              "value": "empty"
+            },
+            {
+              "name": "Sec-Fetch-Mode",
+              "value": "cors"
+            },
+            {
+              "name": "Sec-Fetch-Site",
+              "value": "same-origin"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-App-Version",
+              "value": "0.0.0"
+            },
+            {
+              "name": "X-Auth-Token",
+              "value": "82c0ca7514f037aa26b31df875795ce96b931881"
+            },
+            {
+              "name": "X-Device-Identifier",
+              "value": "0000000"
+            },
+            {
+              "name": "X-OS-Version",
+              "value": "0.0.0"
+            },
+            {
+              "name": "X-Platform",
+              "value": "web"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"macOS\""
+            },
+            {
+              "name": "x-jwt-token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdF9uYW1lIjoicmF1bmFrMiIsImxhc3RfbmFtZSI6IkpvbmVqYSIsImVtYWlsIjoiam9uZWphcmF1bmFrOTlAZ21haWwuY29tIiwidXNlcl9pZCI6MSwicHJvZmlsZV9pZCI6ODk1LCJyb2xlX2lkIjoyLCJyb2xlX25hbWUiOiJ1c2VyIiwidG9rZW4iOiI4MmMwY2E3NTE0ZjAzN2FhMjZiMzFkZjg3NTc5NWNlOTZiOTMxODgxIiwiZXhwaXJlc19hdCI6IjIwMjYtMDEtMTRUMDM6MTc6NTUuMzQwWiIsIm1vYmlsZSI6IjcwMjE0OTYzOTgiLCJjb3VudHJ5X2NvZGUiOiI5MSIsImdlbmRlciI6Im1hbGUiLCJkYXRlX29mX2JpcnRoIjoiMTk5MS0wMS0wMSIsInJvbGVfZGlzcGxheV9uYW1lIjoiVXNlciIsInZlcmlmaWNhdGlvbl9zdGF0dXMiOm51bGwsImhlYWRlcnMiOnsiWC1QbGF0Zm9ybSI6IndlYiIsIlgtRGV2aWNlLUlkZW50aWZpZXIiOiIwMDAwMDAwIiwiWC1BcHAtVmVyc2lvbiI6IjAuMC4wIiwiWC1PUy1WZXJzaW9uIjoiMC4wLjAiLCJYLUFwaS1WZXJzaW9uIjpudWxsfX0.6Z2J7SUtM6lRdb8JanBcZnDn29E203CbnKOroE1R9So"
+            },
+            {
+              "name": "Cookie",
+              "value": "_tccl_visitor=a0536b1e-d861-407e-9eae-1518886fb404; _policy=%7B%22restricted_market%22:true,%22tracking_market%22:%22explicit%22%7D; visitor=vid=f04f15e7-725b-43ab-aff9-0685d5d980c6; _thirtyplus_entries_session=bTm8V06%2Fq4akhJH0Q7wK045SU3eSw%2F%2FQ5gAmI2LJmNrSrSdEc2ufoKOrb2kzLJ4Jisbo8Shwmn%2FUhcx0zQlHlGuVa9igDYSYlmW5WLajcJSTERfiwldLxEftFwiteUk%2FyWJIYBMzLZy8vQTw6OITYijp8WkzXnkhlu0EcjLKQ1JYrPaPURjxKqiTr3KRoJD3%2BjZ1g3H4yE5YvNNI09KJf6x1JUd9r%2FP0H1W6Zj6Whw8yq8zdJQlVMtGHsVg8Kv11xq7Ute3QAPhCgJoS7emt13sWwYSWe2lcLm0JMPkJ0npEN7fJOvRzqGmGk4NwyBvrzbjwqiEvDnEyAtquVFPB07T3vN1f6jV8Esf9HLWjs%2B1Gq2Fi9vLZsJtLeqWYt4usk8rlVKJv6Tksw7n7L0Imr1epd639AwXYdzYT2aQSgj7HkThLYutXy5kzLHHdUoelst%2BCQOSVQRZtN9kh6VW%2BjsrtGQwH5VzgsUVUpgJtB7twu%2F08P%2FrhRWimSM2RBqpUKveH24%2BjHiF2DjfuNQjmQ8v0tkgmBl5y%2F1k%2B1EbBQ1kg0EienG5%2BrEt0y5JxWVGdmFBeQXkmYMf%2Bgl74vKXyAb4IDLD%2BVN2btFBDZ4%2BtTFPc8F2XPF3rOfZlXCmN%2FiSKF16fExGwIEQWQraZJ9JDwY1vHlkQFMDom8vX1iwjQcwT2QU%2B%2Bbi2aKDJuUD0cy%2Bz9Tl35QlpU03QgRuQg0KdDzeiawv3lbBmxAOMwJOIgKELzzEDKMTsH8nOSpB2mNQk0TI2Xn08Y%2F2TFqCOFD6ezghv23nIYTHj7ZJiYf0hGmSNDY%2BEja2aJcz59R5gjGwkLqYy5BvZcMfQGOERHpNq%2FlIlAW2IL9%2BMv2MdXoW4gVZ%2BIIs%2BVrqeB6Msiip1I%2BDLYg1uzdS05NTvdzuzGe1tOSpYM4%2FHW1PcerlFapGICKn3aRnJ2cvI201AkTDgg5vk6Ghfn5gOTp9tbHjSU2AeMJEtQHvv%2B3i2xGhZab5gTsRMNGJ6SsHjBj8mLBphWmyMJv4XasVTRlxluYRyQFXd03dOaNFb80rDKxtQr1Z9pPlo%2Bgym15HNyIYdaRCOW%2FBGVV64iweqAIpTaqFEQrJO31n0eHCHg%2Bk1Pe2kJhxWcJgPRwgloIa8gO9aooL0nEJQoEXoWpcbulS9zkcEVb08KX01Ls6PcGr%2FM2XfhHOC5EThllxYw4npRqAdqt0U%2BwGNDWET%2BlZBN6P77kOTbbkNW6aQMQBnwwwg5UOJOOHXXWnbwvtJe2crPzDsSIhuHolQ%2BVLSKMp8Ifrq%2FxGWe05n%2FY01UTTJ3wyvkoJyg85VkFVERiG9V4ymSWU%2BZjB34eLGNfLEtVmJPJqDsvTFsfWVtwht5QVCHGQUfpLu9x8EpNPI%2BvbCmUPUxnaC9gE4tUljiK7oPKVDJ4ByZzs8fzku7366JQHgOrLXAeOTwVP1lOQyjupeIUyixlf%2F10dFE0GpvCUJaNDUOGYsN2Mkn3fdWcSN9OWFRZIMholj5oH7%2B1CaprMTzJBWkORYVaLAoBofcy5GoPUxd5pEixa4K1vnMc7icaXpKcKC%2Bg%2B%2Bo%2BH3pbGWHHAjOPMhW10EvOrb41nWWnA9wKRD6dJccVUaeIxl91sbwzQ3qQcKgQHfp1JYwk5SXrnKQ0%2BLO1FiY6Ne9VoH9fNAbn8V1jcYiF%2BFy6iLkDxYBYeMr4mAgPQh2l61ZQbBYILZU3GUTtrB4KitI0oqtEDboJVhf1gJrEI3i3PCQMcT9M9jjcADMpruNqAIUJcLoSA%3D--Mkq5Qk29uK7hILoO--rjjw%2FGqqrnDOBA4OTlQQvQ%3D%3D"
+            },
+            {
+              "name": "cookie",
+              "value": "_tccl_visitor=a0536b1e-d861-407e-9eae-1518886fb404;_policy=%7B%22restricted_market%22:true,%22tracking_market%22:%22explicit%22%7D;visitor=vid=f04f15e7-725b-43ab-aff9-0685d5d980c6;_thirtyplus_entries_session=bTm8V06%2Fq4akhJH0Q7wK045SU3eSw%2F%2FQ5gAmI2LJmNrSrSdEc2ufoKOrb2kzLJ4Jisbo8Shwmn%2FUhcx0zQlHlGuVa9igDYSYlmW5WLajcJSTERfiwldLxEftFwiteUk%2FyWJIYBMzLZy8vQTw6OITYijp8WkzXnkhlu0EcjLKQ1JYrPaPURjxKqiTr3KRoJD3%2BjZ1g3H4yE5YvNNI09KJf6x1JUd9r%2FP0H1W6Zj6Whw8yq8zdJQlVMtGHsVg8Kv11xq7Ute3QAPhCgJoS7emt13sWwYSWe2lcLm0JMPkJ0npEN7fJOvRzqGmGk4NwyBvrzbjwqiEvDnEyAtquVFPB07T3vN1f6jV8Esf9HLWjs%2B1Gq2Fi9vLZsJtLeqWYt4usk8rlVKJv6Tksw7n7L0Imr1epd639AwXYdzYT2aQSgj7HkThLYutXy5kzLHHdUoelst%2BCQOSVQRZtN9kh6VW%2BjsrtGQwH5VzgsUVUpgJtB7twu%2F08P%2FrhRWimSM2RBqpUKveH24%2BjHiF2DjfuNQjmQ8v0tkgmBl5y%2F1k%2B1EbBQ1kg0EienG5%2BrEt0y5JxWVGdmFBeQXkmYMf%2Bgl74vKXyAb4IDLD%2BVN2btFBDZ4%2BtTFPc8F2XPF3rOfZlXCmN%2FiSKF16fExGwIEQWQraZJ9JDwY1vHlkQFMDom8vX1iwjQcwT2QU%2B%2Bbi2aKDJuUD0cy%2Bz9Tl35QlpU03QgRuQg0KdDzeiawv3lbBmxAOMwJOIgKELzzEDKMTsH8nOSpB2mNQk0TI2Xn08Y%2F2TFqCOFD6ezghv23nIYTHj7ZJiYf0hGmSNDY%2BEja2aJcz59R5gjGwkLqYy5BvZcMfQGOERHpNq%2FlIlAW2IL9%2BMv2MdXoW4gVZ%2BIIs%2BVrqeB6Msiip1I%2BDLYg1uzdS05NTvdzuzGe1tOSpYM4%2FHW1PcerlFapGICKn3aRnJ2cvI201AkTDgg5vk6Ghfn5gOTp9tbHjSU2AeMJEtQHvv%2B3i2xGhZab5gTsRMNGJ6SsHjBj8mLBphWmyMJv4XasVTRlxluYRyQFXd03dOaNFb80rDKxtQr1Z9pPlo%2Bgym15HNyIYdaRCOW%2FBGVV64iweqAIpTaqFEQrJO31n0eHCHg%2Bk1Pe2kJhxWcJgPRwgloIa8gO9aooL0nEJQoEXoWpcbulS9zkcEVb08KX01Ls6PcGr%2FM2XfhHOC5EThllxYw4npRqAdqt0U%2BwGNDWET%2BlZBN6P77kOTbbkNW6aQMQBnwwwg5UOJOOHXXWnbwvtJe2crPzDsSIhuHolQ%2BVLSKMp8Ifrq%2FxGWe05n%2FY01UTTJ3wyvkoJyg85VkFVERiG9V4ymSWU%2BZjB34eLGNfLEtVmJPJqDsvTFsfWVtwht5QVCHGQUfpLu9x8EpNPI%2BvbCmUPUxnaC9gE4tUljiK7oPKVDJ4ByZzs8fzku7366JQHgOrLXAeOTwVP1lOQyjupeIUyixlf%2F10dFE0GpvCUJaNDUOGYsN2Mkn3fdWcSN9OWFRZIMholj5oH7%2B1CaprMTzJBWkORYVaLAoBofcy5GoPUxd5pEixa4K1vnMc7icaXpKcKC%2Bg%2B%2Bo%2BH3pbGWHHAjOPMhW10EvOrb41nWWnA9wKRD6dJccVUaeIxl91sbwzQ3qQcKgQHfp1JYwk5SXrnKQ0%2BLO1FiY6Ne9VoH9fNAbn8V1jcYiF%2BFy6iLkDxYBYeMr4mAgPQh2l61ZQbBYILZU3GUTtrB4KitI0oqtEDboJVhf1gJrEI3i3PCQMcT9M9jjcADMpruNqAIUJcLoSA%3D--Mkq5Qk29uK7hILoO--rjjw%2FGqqrnDOBA4OTlQQvQ%3D%3D;"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "mobile",
+              "value": "+919930549237"
+            },
+            {
+              "name": "message",
+              "value": "=*Key Points:* {{$json['Key Points']}}\n\n*Average:* {{ $json['Score (Avg)'] }}\n\n*Key Words:* {{ $json['Key Words'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2592,
+        -416
+      ],
+      "id": "632504ca-b421-4359-bbb9-3529b6710f7b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        -416
+      ],
+      "id": "3f4d7fe6-e65c-4a74-afda-65bba9fd3458",
+      "name": "When chat message received",
+      "webhookId": "3b6b76f0-e2fb-41b0-a782-e06ce5524b35"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Search for a post": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Summary Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Summary Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Summary Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summary Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Summary Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Search for a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "19c877d3-b3da-47b1-b2c4-fa4769434c22",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6114df9fa60673927e640f52a642006ef4b43f3523add3de0115435b93c3887b"
+  },
+  "id": "0pm0t5MdB3BkR5X1",
+  "tags": [
+    {
+      "createdAt": "2025-07-17T10:50:30.290Z",
+      "updatedAt": "2025-07-17T10:50:30.290Z",
+      "id": "xNyqJtXWaZoTNNSu",
+      "name": "reddit"
+    }
+  ]
+}

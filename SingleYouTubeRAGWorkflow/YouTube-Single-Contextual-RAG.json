@@ -1,0 +1,1185 @@
+{
+  "name": "YouTube-Single-Contextual-RAG-Prod",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Nathan. How can I assist you today? You can ask me any questions about accounting. ",
+        "options": {
+          "responseMode": "responseNodes"
+        }
+      },
+      "id": "f9b981e2-6b3a-4000-9ee9-b113c147ae91",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -4192,
+        -1440
+      ],
+      "webhookId": "47a42bda-0838-47a5-afb8-a64453d910ac"
+    },
+    {
+      "parameters": {
+        "content": "## V1: Enter Video ID as namespace parameter to begin querying.",
+        "height": 485,
+        "width": 1036
+      },
+      "id": "09ec9a5e-c4bd-4d64-8564-8f8db905078d",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4286,
+        -1557
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=## Role\n\nYou are a Retrieval-Augmented Generation (RAG) assistant designed to answer questions a user has. You use a corpus of transcripts from multiple YouTube lectures that are all text based. Your primary goal is to provide accurate, up-to-date, and relevant information based on what the user asks and the lecture transcripts you retrieve.\n\n## Responsibilities\n\nAnswer user queries with a good mix of being comprehensive but still concise\nPresent information in an easy-to-understand and professional manner\nClarify misconceptions or misinformation\nAlways include proper references to source videos with timestamps at the end of your response\n\n## Reference Format\n\nAt the end of each answer, include a \"References\" section that lists:\n\nVideo title\nTimestamp (if available)\nFormat: \"References:\\n- [Video Title] - [Timestamp]\"\n\n## Other Key Information and Instructions\n\nAlways tell the user if you didn't find the answer. Don't make something up just to please them.\nKeep your language neutral and factual. Do not show bias or opinion\nExtract video titles and timestamps from the metadata of retrieved transcript segments\nIf multiple video sources are used, list all relevant references\n\n## Error Handling\n\nIf the information cannot be found using the provided instructions respond with:\n\"I'm sorry, I couldn't find relevant information based on the available YouTube lecture transcripts.\"\nIf video metadata is incomplete, still provide whatever reference information is available (e.g., just video title if timestamp is missing)\n"
+        }
+      },
+      "id": "4a8675ed-3f82-45e4-9e0b-dd40ce2c4271",
+      "name": "RAG AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        -3808,
+        -1648
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -3696,
+        -1216
+      ],
+      "id": "45171571-e8c7-4e0f-a5ec-5e5052607a16",
+      "name": "Embeddings OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -3840,
+        -1424
+      ],
+      "id": "5f4f9240-2706-4372-accf-2a1815c0b919",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -3968,
+        -1424
+      ],
+      "id": "60ce6e97-6fa4-467e-8d29-5af500b29496",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        -3568,
+        -1216
+      ],
+      "id": "3ab71395-f49b-427d-b152-ddaa3229ae2f",
+      "name": "Reranker Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "KPx9KY02vBAdJ1ab",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "use this tool to get course content from documents",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "youtube-contextual-rag",
+          "mode": "list",
+          "cachedResultName": "youtube-contextual-rag"
+        },
+        "topK": 10,
+        "useReranker": true,
+        "options": {
+          "pineconeNamespace": "youtube-context"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -3712,
+        -1424
+      ],
+      "id": "9efff714-fc50-4cbb-93f4-1ec3ee290155",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "WwDeG34evNN4etxR",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -3424,
+        -1424
+      ],
+      "id": "e1e4455c-832f-42e1-a721-f27f299dc889",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "content": "Single Video Work flow ",
+        "height": 400,
+        "width": 2912
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4280,
+        -960
+      ],
+      "typeVersion": 1,
+      "id": "7f53497c-29e9-47ad-aec4-c6c4c8d4065d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "https://www.searchapi.io/api/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "youtube_transcripts"
+            },
+            {
+              "name": "api_key",
+              "value": "AQ8ZC6wTxvPToEgsgZfaXqYJ"
+            },
+            {
+              "name": "video_id",
+              "value": "={{ $json.vid }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3520,
+        -816
+      ],
+      "id": "dc5a01a3-64ac-4075-af73-520cd08de171",
+      "name": "Get Video Transcript1"
+    },
+    {
+      "parameters": {
+        "formTitle": "YouTubeVideo",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "url"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -4192,
+        -912
+      ],
+      "id": "0a981d41-ce32-4310-964a-a1c4e9dfd378",
+      "name": "On form submission",
+      "webhookId": "dfa7002d-2677-4ede-a9cd-4902fa80451d"
+    },
+    {
+      "parameters": {
+        "url": "https://www.searchapi.io/api/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "youtube_video"
+            },
+            {
+              "name": "api_key",
+              "value": "=AQ8ZC6wTxvPToEgsgZfaXqYJ"
+            },
+            {
+              "name": "video_id",
+              "value": "={{ $json.url.match(/v=([^&]+)/)[1] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3968,
+        -816
+      ],
+      "id": "5692b093-9233-4196-a056-5aca8ef7143e",
+      "name": "Get Video Information1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA",
+          "mode": "list",
+          "cachedResultName": "single_youtube_contextual_rag",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "vid": "={{ $json.video.id }}",
+            "title": "={{ $json.video.title }}",
+            "status": "processing"
+          },
+          "matchingColumns": [
+            "vid"
+          ],
+          "schema": [
+            {
+              "id": "vid",
+              "displayName": "vid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "full_transcript",
+              "displayName": "full_transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3744,
+        -816
+      ],
+      "id": "3d7239cf-fa13-42a9-a0df-b0db613efdb8",
+      "name": "Append or update row in sheet5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<document> \n{{ $('fullTranscript').item.json.transcript }}\n</document>\nHere is the chunk we want to situate within the whole document \n<chunk> \n{{ $json.text }}\n</chunk> \nPlease give a short succinct context to situate this chunk within the overall document for the purposes of improving search retrieval of the chunk. Answer only with the succinct context and nothing else. "
+      },
+      "id": "3c25e181-f1fd-4ccc-894c-9013b2764724",
+      "name": "Generate Contextual Text1",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -2624,
+        -720
+      ],
+      "alwaysOutputData": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2552,
+        -496
+      ],
+      "id": "2cacfffb-a087-4f69-b4ee-7527e8658717",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo",
+          "mode": "list",
+          "cachedResultName": "youtube_video",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "context": "={{ $json.text }}",
+            "start_time": "={{ $('processTranscript1').item.json.start_time }}",
+            "end_time": "={{ $('processTranscript1').item.json.end_time }}"
+          },
+          "matchingColumns": [
+            "start_time"
+          ],
+          "schema": [
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "end_time",
+              "displayName": "end_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2272,
+        -720
+      ],
+      "id": "9e2e0c9d-b0ef-4810-b99c-408866c19ffa",
+      "name": "Append or update row in sheet6",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "  const jsonArray = $('Split Out1').all()\nconst chunkSize = 20\nconst result = [];\n  \n  // Process array in chunks of specified size\n  for (let i = 0; i < jsonArray.length; i += chunkSize) {\n    // Get the current chunk (up to chunkSize items)\n    const chunk = jsonArray.slice(i, Math.min(i + chunkSize, jsonArray.length));\n    if (chunk.length === 0) continue;\n    \n    // Concatenate all text fields with a space\n    const combinedText = chunk.map(item => item.json.text).join(' ');\n    \n    // Get start time from first item\n    const startTime = chunk[0].json.start;\n    // Calculate end time from last item (start + duration)\n    const lastItem = chunk[chunk.length - 1];\n    const endTime = lastItem.json.start + lastItem.json.duration;\n     \n    const mins = Math.floor(startTime / 60);\n  const secs = Math.floor(startTime % 60)\n    .toString()\n    .padStart(2, \"0\");\n\n  const emins = Math.floor(endTime / 60);\n  const esecs = Math.floor(endTime % 60)\n    .toString()\n    .padStart(2, \"0\");\n    \n  timestamp = `${mins}:${secs}` + \"-\" + `${emins}:${esecs}`\n    \n    // Create the combined object\n    const combinedObject = {\n      text: combinedText,\n      start_time: startTime,\n      end_time: endTime,\n      timestamp: timestamp\n    };\n    \n    result.push(combinedObject);\n  }\n  \n  return result;\n"
+      },
+      "id": "47d8e501-bce1-4e4b-88f7-9534d4f5eb6a",
+      "name": "processTranscript1",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -2848,
+        -720
+      ],
+      "typeVersion": 1,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\n\nvar full_text = \"\"\nfor (const item of  $input.all()) {\n  full_text += item.json.text\n}\n\nreturn {transcript: full_text, vid:$('Append or update row in sheet5').first().json.vid, title:$('Append or update row in sheet5').first().json.title }"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3072,
+        -816
+      ],
+      "id": "eb1e124c-bece-4895-98ea-84d27cff4a5c",
+      "name": "fullTranscript"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA",
+          "mode": "list",
+          "cachedResultName": "single_youtube_contextual_rag",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "vid": "={{ $json.vid }}",
+            "full_transcript": "={{ $json.transcript }}",
+            "status": "processed"
+          },
+          "matchingColumns": [
+            "vid"
+          ],
+          "schema": [
+            {
+              "id": "vid",
+              "displayName": "vid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "full_transcript",
+              "displayName": "full_transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2848,
+        -912
+      ],
+      "id": "b41a9348-3a9f-416f-8cb2-22ca9e3543d9",
+      "name": "Append or update row in sheet7",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo",
+          "mode": "list",
+          "cachedResultName": "youtube_video",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3968,
+        -1008
+      ],
+      "id": "d562edf7-e5c1-46ac-9d31-d768587545dc",
+      "name": "Get row(s) in sheet4",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7f33e36d-07dd-40d7-ac3c-2427baa1f1f0",
+              "leftValue": "={{ $input.all() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3744,
+        -1008
+      ],
+      "id": "54462325-6ee8-4b4e-87a6-08555b245faf",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo",
+          "mode": "list",
+          "cachedResultName": "youtube_video",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iVFZPdstnT331g7OYg9UllFwQFuwi0jvjawnT-lNibo/edit#gid=0"
+        },
+        "numberToDelete": "={{ $input.all().length - 1 }}"
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3520,
+        -1008
+      ],
+      "id": "5e588af0-99ca-48d5-a5a6-813fd6c837c2",
+      "name": "Delete rows or columns from sheet",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "transcripts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -3296,
+        -816
+      ],
+      "id": "52051552-11b0-4b2f-942c-7d663ab2c0ec",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "youtube",
+          "mode": "list",
+          "cachedResultName": "youtube"
+        },
+        "options": {
+          "clearNamespace": true,
+          "pineconeNamespace": "={{ $('fullTranscript').item.json.vid }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -2016,
+        -720
+      ],
+      "id": "709da49f-3c32-4034-a497-e354dd0629f8",
+      "name": "Pinecone Vector Store3",
+      "credentials": {
+        "pineconeApi": {
+          "id": "WwDeG34evNN4etxR",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2048,
+        -496
+      ],
+      "id": "89b07bd4-85f6-471f-a7e7-4814aafb1bfa",
+      "name": "Embeddings OpenAI3",
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{\n{\n  \"content\": `${ $json.context }\\n---\\n${ $json.chunk }`\n}\n}}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "=videoTitle",
+                "value": "={{ $('fullTranscript').item.json.title }}"
+              },
+              {
+                "name": "videoURL",
+                "value": "=https://youtube.com/watch?v={{ $('fullTranscript').item.json.vid }}"
+              },
+              {
+                "name": "timeestamp",
+                "value": "={{ $('processTranscript1').item.json.timestamp }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "e388fb87-c360-402d-b633-8968b219bd55",
+      "name": "Default Data Loader3",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        -496
+      ]
+    },
+    {
+      "parameters": {
+        "chunkSize": 20000,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        -288
+      ],
+      "id": "1af228c7-95c6-4054-9dd5-f552480fc2e6",
+      "name": "Recursive Character Text Splitter1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA",
+          "mode": "list",
+          "cachedResultName": "single_youtube_contextual_rag",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1toEaIhx7-EkwuGUaYWQBdSuDMQ3mwftpY0WU3prMlwA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "vid": "={{ $json.metadata.videoURL.match(/v=([^&]+)/)[1] }}",
+            "status": "STORED"
+          },
+          "matchingColumns": [
+            "vid"
+          ],
+          "schema": [
+            {
+              "id": "vid",
+              "displayName": "vid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "full_transcript",
+              "displayName": "full_transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1552,
+        -720
+      ],
+      "id": "57e82111-8d81-41a3-b8d5-e8381f8ea610",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Transcript1": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get Video Information1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Information1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet5": {
+      "main": [
+        [
+          {
+            "node": "Get Video Transcript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Contextual Text1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Contextual Text1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "processTranscript1": {
+      "main": [
+        [
+          {
+            "node": "Generate Contextual Text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fullTranscript": {
+      "main": [
+        [
+          {
+            "node": "processTranscript1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append or update row in sheet7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet4": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Delete rows or columns from sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "fullTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet7": {
+      "main": [
+        []
+      ]
+    },
+    "Append or update row in sheet6": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI3": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter1": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader3",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader3": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store3": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG AI Agent": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "10afd32c-5809-49a1-a629-06336a38e896",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6114df9fa60673927e640f52a642006ef4b43f3523add3de0115435b93c3887b"
+  },
+  "id": "fohUf1tEdKb4vV7R",
+  "tags": []
+}

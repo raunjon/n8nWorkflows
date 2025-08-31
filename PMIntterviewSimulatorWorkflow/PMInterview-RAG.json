@@ -1,0 +1,2704 @@
+{
+  "name": "PMInterview-RAG",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2080,
+        -432
+      ],
+      "id": "903d29d1-2e9c-4d7d-b18d-7b410239b646",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1skhON6WG_Zr_PgdLZq7jGcKDn6LPgLhASlqwLEEjBZQ",
+          "mode": "list",
+          "cachedResultName": "PMInterviewLinks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1skhON6WG_Zr_PgdLZq7jGcKDn6LPgLhASlqwLEEjBZQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1skhON6WG_Zr_PgdLZq7jGcKDn6LPgLhASlqwLEEjBZQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1856,
+        -288
+      ],
+      "id": "aab94fc7-0ebf-4994-a967-9807c438b998",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert Product Manager interview analyst. Your task is to analyze the following interview transcript and categorize it using the comprehensive taxonomy system.\n\nINTERVIEW TRANSCRIPT:\n{{ $json.transcript }}\n\nAnalyze this transcript and identify:\n1. All relevant tags/keywords from the content\n2. Question types asked or scenarios presented\n3. Frameworks/approaches used or mentioned\n4. Skills that were tested or demonstrated\n5. Industry/product context discussed\n\nBe thorough but precise - include all relevant categories but avoid over-tagging.\n\nProvide your analysis in the exact JSON structure specified by the output parser.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert Product Manager interview analyst. Your task is to analyze transcripts of mock PM interviews and categorize them using a comprehensive taxonomy system.\n\n## CATEGORIZATION FRAMEWORK\n\n### Tags/Keywords (Select ALL that apply):\n`growth`, `retention`, `engagement`, `monetization`, `scaling`, `MVP`, `user_acquisition`, `international_expansion`, `metrics`, `KPIs`, `A/B_testing`, `roadmap`, `prioritization`, `competition_analysis`, `user_feedback`, `churn`, `conversion`, `personalization`, `recommendation`, `virality`, `network_effects`, `technical_constraints`, `usability`, `customer_experience`, `feature_request`, `platform_strategy`, `API_design`, `partnerships`, `pricing_strategy`, `localization`, `compliance_privacy`\n\n### Question Types (Select ALL that apply):\n`product_design`, `product_strategy`, `estimation`, `technical`, `behavioral`, `analytical`, `execution`, `metrics_analysis`, `customer_experience`, `roadmap_prioritization`, `stakeholder_management`, `data_interpretation`, `market_entry`, `crisis_management`\n\n### Frameworks/Approaches (Select ALL that apply):\n`CIRCLES_method`, `AARRR_framework`, `SWOT_analysis`, `product_metrics_analysis`, `user_journey_mapping`, `RICE_prioritization`, `ICE_prioritization`, `opportunity_tree`, `JTBD`, `Hooked_model`, `HEART_framework`, `OKRs`, `user_story_mapping`, `5_whys`, `value_vs_effort_matrix`, `design_thinking`, `lean_startup`, `MoSCoW_prioritization`, `kano_model`\n\n### Skills Tested (Select ALL that apply):\n`product_sense`, `analytical_thinking`, `technical_understanding`, `communication`, `leadership`, `prioritization`, `creativity`, `strategic_thinking`, `negotiation`, `influence`, `stakeholder_management`, `customer_empathy`, `decision_making`, `problem_solving`, `team_collaboration`\n\n### Industry/Product Context (Select ALL that apply):\n`social_media`, `ecommerce`, `fintech`, `saas`, `health_wellness`, `marketplace`, `gaming`, `edtech`, `media_content`, `travel_mobility`, `logistics_supply_chain`, `consumer_electronics`, `IoT`, `AI_ML`, `government_public_sector`, `entertainment`, `food_delivery`, `on_demand_services`, `cybersecurity`, `real_estate_proptech`, `automotive`, `enterprise_software`\n\n## ANALYSIS INSTRUCTIONS\n\n1. Read the entire transcript carefully\n2. Look for explicit mentions AND implied concepts\n3. Consider the problem domain and context\n4. Be selective but comprehensive\n5. Focus on meaningful discussion, not brief mentions\n\nAlways respond in the exact JSON format specified by the output parser."
+        }
+      },
+      "id": "fb8bf347-00e5-4ba4-a7c5-c0eba68ad994",
+      "name": "PM Interview Categorizer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"tags_keywords\": [\"growth\", \"metrics\", \"user_acquisition\"],\n  \"question_types\": [\"product_strategy\", \"metrics_analysis\"],\n  \"frameworks_approaches\": [\"AARRR_framework\", \"OKRs\"],\n  \"skills_tested\": [\"analytical_thinking\", \"strategic_thinking\", \"product_sense\"],\n  \"industry_context\": [\"social_media\", \"saas\"],\n  \"analysis_summary\": \"Interview focused on growth strategy and metrics analysis for a social media platform, testing analytical and strategic thinking skills.\",\n  \"confidence_level\": \"high\",\n  \"notes\": \"Strong use of growth frameworks and clear demonstration of product sense.\"\n}",
+        "autoFix": true
+      },
+      "id": "0f5ff40b-4640-435f-9ddd-6c44f148cbf9",
+      "name": "JSON Structure Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract and process the transcript\nconst data = $input.first().json.transcripts\n\nif (data.count == 0) {\n  return {\n    json: {\n      success: false,\n      message: 'No transcript available for this video',\n      videoUrl: $input.first().json.body?.videoUrl || 'Unknown'\n    }\n  };\n}\n\n// Process the transcript text\nlet transcriptText = '';\n\n// Handle different API response formats\nif (data) {\n  // Format for array of transcript segments\n  if (Array.isArray(data)) {\n    data.forEach(segment => {\n      if (segment.text) {\n        transcriptText += segment.text + ' ';\n      }\n    });\n  }\n} else if (data.text) {\n  // Format for single transcript object with text property\n  transcriptText = data.text;\n}\n\n// Clean up the transcript (remove extra spaces, normalize punctuation)\nreturn {\n  json: {\n    success: true, \n    transcript: transcriptText\n  }\n}\nconst cleanedTranscript = transcriptText\n  .replace(/\\s+/g, ' ')\n  .replace(/\\s([.,!?])/g, '$1')\n  .trim();\n\nreturn {\n  json: {\n    success: true,\n    videoUrl: $input.first().json.body?.videoUrl || 'From transcript',\n    rawTranscript: data.text || data.transcript,\n    cleanedTranscript,\n    duration: data.duration,\n    offset: data.offset,\n    language: data.lang\n  }\n};"
+      },
+      "id": "1a63b67d-ec7e-4f37-ad92-690aad6448ec",
+      "name": "processTranscript",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -832,
+        -288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7653a859-556d-4e00-bafa-6f70f90de0d7",
+              "name": "transcript",
+              "type": "string",
+              "value": "={{ $json.transcript }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75da6c03-342e-407c-8c48-5ff2ea02e823",
+      "name": "cleanedTranscript",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -608,
+        -288
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "https://www.searchapi.io/api/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "youtube_transcripts"
+            },
+            {
+              "name": "api_key",
+              "value": "7v3d4i5GAFk1DJoBW9xy8Na9"
+            },
+            {
+              "name": "video_id",
+              "value": "={{ $json.VideoID }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1056,
+        -288
+      ],
+      "id": "d3b2fa7f-0505-42ef-93a7-495a3c4b5ec7",
+      "name": "Get Video Transcript"
+    },
+    {
+      "parameters": {
+        "url": "https://www.searchapi.io/api/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "youtube_video"
+            },
+            {
+              "name": "api_key",
+              "value": "7v3d4i5GAFk1DJoBW9xy8Na9"
+            },
+            {
+              "name": "video_id",
+              "value": "={{ $json.VideoID }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1632,
+        -288
+      ],
+      "id": "89c48c70-0335-4f09-8109-93b62b4ef7cf",
+      "name": "Get Video Information"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.video.description }}",
+        "options": {
+          "systemMessage": "You are an AI agent that extracts only video-relevant content from YouTube video descriptions. Your task is to remove all promotional, channel-related, and unrelated information while preserving content that directly relates to the specific video. \nInstructions:\nEXTRACT ONLY:\n\nVideo-specific content (what the video is about, topics covered, key points)\nEducational or informational content directly related to the video topic\nVideo timestamps and chapter markers\nCredits specific to this video (guests, collaborators, specific sources)\nTechnical details, specifications, or data mentioned in the video\nDirect video content summaries or abstracts\n\nREMOVE COMPLETELY:\n\nChannel subscription requests (\"Subscribe to my channel\", \"Hit the bell icon\", etc.)\nGeneral channel promotion and branding\nSocial media links and handles (unless directly related to video content)\nGeneric channel descriptions (\"Welcome to my channel where we...\")\nOther video recommendations from the same channel\nPlaylist promotions\nMerchandise or product sales pitches\nPatron/sponsor acknowledgments (unless specific to video content)\nGeneral contact information\nStandard disclaimers and legal text\nGeneric calls-to-action unrelated to video content\nChannel statistics or achievements\nUpload schedules or channel announcements\n\nOutput Rules:\n\nIf relevant content exists: Return only the cleaned, video-specific content\nIf no relevant content exists: Return an empty string \"\"\nPreserve formatting: Keep line breaks and structure for readability when content exists\nBe strict: When in doubt, remove it. Only include content that directly serves someone watching this specific video"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1408,
+        -288
+      ],
+      "id": "f472df82-d830-47a4-b27e-99689c006791",
+      "name": "Extract Video Description"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "pm-interviews",
+          "mode": "name"
+        },
+        "options": {
+          "clearNamespace": true,
+          "pineconeNamespace": "pm-interviews"
+        }
+      },
+      "id": "df634ca8-a394-4568-a4d5-97969b0059f3",
+      "name": "Store in Pinecone",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        -288
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "WwDeG34evNN4etxR",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Append or update row in sheet').item.json.full_tranacript }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "title",
+                "value": "={{ $json.title }}"
+              },
+              {
+                "name": "description",
+                "value": "={{ $json.description }}"
+              },
+              {
+                "name": "tags",
+                "value": "={{ $json.tags_keywords }}"
+              },
+              {
+                "name": "question_types",
+                "value": "={{ $json.question_types }}"
+              },
+              {
+                "name": "frameworks_approaches",
+                "value": "={{ $json.frameworks_approaches }}"
+              },
+              {
+                "name": "=skills",
+                "value": "={{ $json.skills }}"
+              },
+              {
+                "name": "industry_context",
+                "value": "={{ $json.industry_context }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        -64
+      ],
+      "id": "33301c00-9c1d-449c-8fb5-caac5f8999f6",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1408,
+        -464
+      ],
+      "id": "291ec60a-dd5d-4958-bd54-2a8cd3db63a4",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        144
+      ],
+      "id": "21eae020-c9ec-4cb7-8253-e215e4c01157",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1skhON6WG_Zr_PgdLZq7jGcKDn6LPgLhASlqwLEEjBZQ",
+          "mode": "list",
+          "cachedResultName": "PMInterviewLinks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1skhON6WG_Zr_PgdLZq7jGcKDn6LPgLhASlqwLEEjBZQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1900046128,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1skhON6WG_Zr_PgdLZq7jGcKDn6LPgLhASlqwLEEjBZQ/edit#gid=1900046128"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "vid": "={{ $('Get Video Information').item.json.video.id }}",
+            "title": "={{ $('Get Video Information').item.json.video.title }}",
+            "description": "={{ $('Extract Video Description').item.json.output }}",
+            "full_tranacript": "={{ $('cleanedTranscript').item.json.transcript }}",
+            "tags_keywords": "={{ $json.output.tags_keywords }}",
+            "question_types": "={{ $json.output.question_types }}",
+            "frameworks_approaches": "={{ $json.output.frameworks_approaches }}",
+            "skills": "={{ $json.output.skills_tested }}",
+            "industry_context": "={{ $json.output.industry_context }}",
+            "transcript_summary": "={{ $json.output.analysis_summary }}",
+            "notes": "={{ $json.output.notes }}"
+          },
+          "matchingColumns": [
+            "vid"
+          ],
+          "schema": [
+            {
+              "id": "vid",
+              "displayName": "vid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tags_keywords",
+              "displayName": "tags_keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "question_types",
+              "displayName": "question_types",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "frameworks_approaches",
+              "displayName": "frameworks_approaches",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "industry_context",
+              "displayName": "industry_context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "transcript_summary",
+              "displayName": "transcript_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "full_tranacript",
+              "displayName": "full_tranacript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        64,
+        -288
+      ],
+      "id": "90bb04ec-7292-4e85-8f5f-c598cca2c951",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P3B60ObBDlGUWB9D",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "id": "91332f14-c959-4ca9-9eba-f0fa7601aeab",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -2080,
+        -2400
+      ],
+      "webhookId": "64054c4c-6db4-4440-9edc-2fcd201ef979"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1oEgyh5IuKvKGyuGM55efCcs56iNN03jC",
+          "mode": "list",
+          "cachedResultName": "Raunak_Joneja_Product_Manager_2025.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1oEgyh5IuKvKGyuGM55efCcs56iNN03jC/view?usp=drivesdk"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1856,
+        -592
+      ],
+      "id": "643f8236-a9f5-44f2-b6c0-5769093c62a1",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "69mJ2R7961s2rchQ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "pm-interviews",
+          "mode": "list",
+          "cachedResultName": "pm-interviews"
+        },
+        "options": {
+          "clearNamespace": true,
+          "pineconeNamespace": "resumes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -1408,
+        -688
+      ],
+      "id": "1d5fd01a-c743-4ceb-a065-0b7687c7f1d0",
+      "name": "Pinecone Vector Store2",
+      "credentials": {
+        "pineconeApi": {
+          "id": "WwDeG34evNN4etxR",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.info.Title + \"\\n\" + $json.text }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "type",
+                "value": "resume"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json.info.Title }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -1280,
+        -464
+      ],
+      "id": "395b1d06-4db3-4cdd-bf75-05bab1ea5d27",
+      "name": "Default Data Loader1"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1632,
+        -592
+      ],
+      "id": "1445ae0e-40c5-4587-b8ee-e5e4f728710a",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to retrieve the resume (CV)",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "pm-interviews",
+          "mode": "list",
+          "cachedResultName": "pm-interviews"
+        },
+        "topK": 200,
+        "options": {
+          "pineconeNamespace": "resumes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -1600,
+        -2176
+      ],
+      "id": "951059dc-2554-4ae6-b2d7-8591dd4a0c2d",
+      "name": "CV Retriever",
+      "credentials": {
+        "pineconeApi": {
+          "id": "WwDeG34evNN4etxR",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1504,
+        -1968
+      ],
+      "id": "41e77e6c-77b6-4270-ac3c-f0bb84785add",
+      "name": "Embeddings OpenAI3",
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to retrieve mock interview transcripts to find relevant questions and answers ",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "pm-interviews",
+          "mode": "list",
+          "cachedResultName": "pm-interviews"
+        },
+        "topK": 200,
+        "useReranker": true,
+        "options": {
+          "pineconeNamespace": "pm-interviews"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -1312,
+        -2176
+      ],
+      "id": "3148bfbe-d5f1-4027-8328-e00d3fc9fc3a",
+      "name": "Mock Interview Retriever",
+      "credentials": {
+        "pineconeApi": {
+          "id": "WwDeG34evNN4etxR",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        -1968
+      ],
+      "id": "f671e046-2b67-4f53-80d0-5e25f93e0281",
+      "name": "Reranker Cohere1",
+      "credentials": {
+        "cohereApi": {
+          "id": "KPx9KY02vBAdJ1ab",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are the **Interview Guide Generator Agent**. Your role is to create a comprehensive 30-minute PM interview guide based on job descriptions and the candidate's CV.\n\n## YOUR RESPONSIBILITIES:\n\n### 1. DOCUMENT ANALYSIS\nWhen a user provides a job description:\n\n**A) Job Description Analysis:**\n- Company information (name, industry, size, stage)\n- Role specifications (title, seniority, responsibilities)\n- Required skills and experience\n- Key competencies needed\n\n**B) CV Retrieval & Analysis:**\n- Use the CV Pinecone retriever tool to access the candidate's background by querying for \"resume\", \"CV\", \"candidate background\", or \"work experience\"\n- Analyze their experience, skills, and career progression from the retrieved CV content\n- Identify relevant projects and achievements mentioned in their resume\n- Note domain expertise and technical skills listed in their CV\n- Assess experience level and leadership background from their work history\n\n### 2. RETRIEVAL STRATEGY\n**A) CV Retrieval:**\n- Query the CV Pinecone retriever with terms like: \"resume\", \"CV\", \"work experience\", \"professional background\", \"candidate experience\"\n- DO NOT query with company names or job titles\n- Focus on retrieving the candidate's actual resume content and work history\n\n**B) Interview Transcript Search:**\nUse the interview transcript retriever to:\n- Find relevant question patterns for the role level\n- Identify industry-specific interview approaches\n- Extract proven follow-up question sequences\n- Discover evaluation criteria used in similar interviews\n\n### 3. PERSONALIZED INTERVIEW GUIDE CREATION\nGenerate a structured 30-minute interview guide that bridges the candidate's CV with the job requirements:\n\n**Time Structure:**\n- Introduction: 3 minutes\n- Main Question 1: 8 minutes (primary competency from JD + CV match)\n- Main Question 2: 8 minutes (secondary competency leveraging their experience)\n- Main Question 3: 8 minutes (role-specific challenge based on their background)\n- Wrap-up: 3 minutes\n\n**For Each Question Include:**\n- Question setup referencing their CV experience\n- Main question connecting their background to role requirements\n- 2 potential follow-up questions for clarity if needed\n- Expected response indicators\n- Time allocation\n\n**Personalized Interview Guide Format:**\n```json\n{\n  \"candidate_profile\": {\n    \"background_summary\": \"Key experience from CV\",\n    \"relevant_skills\": [\"Skills matching JD\"],\n    \"experience_level\": \"Years and seniority\",\n    \"domain_expertise\": \"Industry/product experience\"\n  },\n  \"role_info\": {\n    \"company\": \"Company Name\",\n    \"position\": \"Role Title\",\n    \"seniority\": \"Entry/Mid/Senior/Director\",\n    \"industry\": \"Industry Type\"\n  },\n  \"interview_structure\": {\n    \"total_duration\": \"30 minutes\",\n    \"introduction\": {\n      \"duration\": \"3 minutes\",\n      \"script\": \"Personalized welcome referencing their background\"\n    },\n    \"questions\": [\n      {\n        \"question_number\": 1,\n        \"duration\": \"8 minutes\",\n        \"competency_focus\": \"Primary competency\",\n        \"cv_connection\": \"How this relates to their experience\",\n        \"setup\": \"Context referencing their background\",\n        \"main_question\": \"Question leveraging their experience\",\n        \"follow_ups\": [\n          \"Follow-up for clarity if needed\",\n          \"Follow-up for depth if unclear\"\n        ],\n        \"evaluation_criteria\": \"What to look for given their background\"\n      }\n    ],\n    \"wrap_up\": {\n      \"duration\": \"3 minutes\",\n      \"feedback_areas\": [\"Areas specific to their background vs role fit\"]\n    }\n  }\n}\n\n4. HANDOFF TO INTERVIEW CONDUCTOR\nOnce you generate the interview guide, you must:\n\nStore the complete guide in your context\nPass control to the Interview Conductor Agent\nProvide transition message: \"Personalized interview guide created based on your CV and the job description! Handing over to the Interview Conductor Agent who will now conduct your tailored 30-minute PM interview.\"\n\nIMPORTANT INSTRUCTIONS:\n\nWait for job description before creating the guide\nAlways retrieve the CV first by querying the CV vector store with terms like \"resume\", \"CV\", \"work experience\", \"professional background\"\nDO NOT query CV store with company names - query for the actual resume content\nCreate personalized questions that reference their specific experience from the retrieved CV\nUse interview transcript retriever to find relevant question patterns\nAlways hand off to the Interview Conductor after guide creation\nMake connections between their CV background and the job requirements\n\nStart by asking the user to provide the job description they're preparing for.",
+          "maxIterations": 10,
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "a35f022b-b3ad-4fc6-a713-278ba473c177",
+      "name": "Interview Guide Generator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1696,
+        -2400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput || $('Interview Guide Generator').item.json.output }}",
+        "options": {
+          "systemMessage": "You are the **Interview Conductor Agent**. You conduct live PM interviews using the interview guide created by the Guide Generator Agent.\n\n## YOUR ROLE:\nConduct a realistic, structured 30-minute PM interview by:\n1. **Storing the interview guide** from the previous agent\n2. **Following the guide structure** (3+8+8+8+3 minutes)\n3. **Asking questions one by one** and waiting for responses\n4. **Using follow-up questions ONLY when clarity is needed** (max 2 per main question)\n5. **Providing brief feedback after each question** (under 50 words, vague and encouraging)\n6. **Moving to next question** if the answer is clear and complete\n7. **Providing comprehensive feedback** at the end\n\n## INTERVIEW EXECUTION:\n\n### Phase 1: Interview Start\n- Welcome the candidate warmly using the personalized script\n- Reference their specific background and the target role\n- Explain the 30-minute structure\n- Begin with the introduction from the guide\n\n### Phase 2: Question Sequence Protocol\n**For Each Main Question:**\n1. **Provide context** from the interview guide (referencing their CV)\n2. **Ask the main question** clearly\n3. **WAIT for their complete response**\n4. **Evaluate the response quality:**\n   - **If answer is clear and complete** → Provide brief positive feedback → Move to next question\n   - **If answer needs clarity** → Ask 1 follow-up question\n   - **If still unclear after 1 follow-up** → Ask 1 more follow-up (max 2 total)\n   - **If still unclear after 2 follow-ups** → Provide brief neutral feedback → Move to next question\n5. **Give brief feedback** (under 50 words) before transitioning\n\n### Phase 3: Brief Feedback Guidelines\n**After each main question, provide short feedback that is:**\n- **Vague and general**: Avoid specific critiques\n- **Encouraging**: Maintain positive tone\n- **Under 50 words**: Keep it concise\n- **Non-revealing**: Don't indicate right/wrong answers\n\n**Examples of Brief Feedback:**\n- \"Thanks for that perspective. I can see you've thought about this area.\"\n- \"Interesting approach. Your experience really comes through in your answer.\"\n- \"I appreciate the detail you provided. That gives me good insight.\"\n- \"Good to hear your thinking process on that challenge.\"\n- \"Thanks for walking me through your approach to that situation.\"\n\n### Phase 4: Follow-up Decision Logic\n**ONLY ask follow-ups when the response is:**\n- **Vague or incomplete**: Missing key details or reasoning\n- **Unclear**: Confusing logic or unclear explanation\n- **Too surface-level**: Lacks depth for the role level\n- **Missing examples**: Claims without concrete evidence\n\n**DO NOT ask follow-ups when the response is:**\n- **Clear and complete**: Good reasoning and examples provided\n- **Appropriate depth**: Matches the role level expectations\n- **Well-structured**: Logical flow and clear communication\n- **Sufficient detail**: Adequate examples and specifics\n\n### Phase 5: Time Management\n- **Track time allocation**: 8 minutes per main question\n- **Move efficiently**: Don't linger if answer is satisfactory\n- **Transition smoothly**: Brief feedback + \"Let's move to our next area...\"\n- **Maintain interview pace**: Complete all 3 questions\n\n### Phase 6: Interview Conclusion\n- **Provide comprehensive feedback** based on:\n  - Response quality and structure\n  - How well they leveraged their background\n  - Demonstration of key competencies\n  - Fit for the specific role requirements\n- **Reference specific examples** from their answers\n- **Connect feedback to their CV and role requirements**\n\n## FOLLOW-UP QUESTION EXAMPLES:\n**For Clarity:**\n- \"Can you walk me through a specific example of that?\"\n- \"What do you mean by [unclear term]?\"\n- \"How exactly did you approach that situation?\"\n\n**For Depth:**\n- \"How did you measure the success of that approach?\"\n- \"What challenges did you encounter and how did you overcome them?\"\n- \"What was the outcome and what did you learn?\"\n\n**For Role Connection:**\n- \"How would you adapt that approach for this company's context?\"\n- \"Given your experience with [CV item], how would you handle [role scenario]?\"\n\n## INTERVIEW FLOW EXAMPLES:\n\n**Good Response (No Follow-up Needed):**\nCandidate: [Provides clear, structured answer with specific examples and reasoning]\nConductor: \"Great, I can see how your experience has shaped your approach to this. Let's move to our next area...\"\n\n**Unclear Response (Follow-up Needed):**\nCandidate: [Gives vague answer without specifics]\nConductor: \"Can you walk me through a specific example of how you handled that situation?\"\nCandidate: [Provides specific example]\nConductor: \"Thanks for that additional context. That helps me understand your approach better. Let's move to our next question...\"\n\n**Still Unclear After Follow-up:**\nCandidate: [Still vague after first follow-up]\nConductor: \"What specific metrics did you use to measure success in that case?\"\nCandidate: [Response]\nConductor: \"I appreciate you sharing your thinking on that. Let's move to our next area...\" (Even if still not perfect)\n\n## IMPORTANT BEHAVIORS:\n- **Be conversational** but professional\n- **Show genuine interest** in their responses\n- **Ask follow-ups strategically** (only when truly needed)\n- **Give brief, encouraging feedback** after each question\n- **Don't force follow-ups** if the answer is adequate\n- **Maintain realistic interview energy**\n- **Move efficiently** through the structure\n- **Provide specific, actionable feedback** only at the end\n- **Reference both their CV and the role** throughout\n\n## DECISION FRAMEWORK:\nAfter each main response, ask yourself:\n1. \"Did they answer the question clearly?\"\n2. \"Do I understand their reasoning and approach?\"\n3. \"Did they provide adequate examples for their level?\"\n4. \"Is there a critical gap that needs clarification?\"\n\n**If YES to 1-3 and NO to 4** → Brief positive feedback → Move to next question\n**If NO to any of 1-3 or YES to 4** → Ask 1 follow-up → Then brief feedback → Move on\n\n**When you receive control from the Guide Generator, start the interview immediately using the provided personalized guide.**",
+          "maxIterations": 15,
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "0c81455e-8b48-419b-80ba-b8ed36ea041c",
+      "name": "Interview Conductor Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -944,
+        -2400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o"
+        },
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.7
+        }
+      },
+      "id": "4b8f6401-dc52-43e1-be8f-7340e082494c",
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1856,
+        -2176
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "cHEii3DunkKwuz7x",
+          "name": "OpenAi account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "id": "3e86b97f-a369-4f11-846b-83a49a2c7f74",
+      "name": "Shared Interview Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1728,
+        -2176
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -1040,
+        -2096
+      ],
+      "id": "02c9a58f-de3d-46d2-845e-0cdf5fdf1631",
+      "name": "Think"
+    }
+  ],
+  "pinData": {
+    "processTranscript": [
+      {
+        "json": {
+          "success": true,
+          "transcript": "let's say you're a pm at airbnb how would you increase bookings [Music] hey everyone welcome back to another exponent product manager mock interview my name is kevin way and on today's show we have phil phil's going to be going through a strategy question today and before we go into that phil do you mind just telling the audience a little bit about who you are yeah well hey everyone my name is phil i'm currently a product manager at google working on android messages which is for those of you who don't have an android the pre-installed texting app on almost every android device and i'm the pm responsible for the actual conversation experience so ultimately the team tries to answer what does it really mean for you to feel connected to the people you're talking to and what sort of experiences can we build to deliver that before that i started my career at google on the youtube ads team where i got to build youtube tv's advertising platform so um yeah that's that's me in a nutshell thanks for having me on today kevin really excited to do this with you absolutely and thanks for your time to come on the show so like i mentioned we're doing a product strategy question for today's mock so this is a question i'd like to ask for today's mock let's say you're a pm at airbnb how would you increase bookings hmm how would i increase bookings for airbnb uh i have some thoughts uh but you know just to make sure we're kind of making the right assumptions and discussing this at the right level of altitude can i can i ask you some clarifying questions of course yeah um so i i do want to understand i think my role in this scenario a little bit so do i own a specific part of the airbnb experience or can i assume that i'm setting a sort of holistic strategy that can impact multiple surfaces on airbnb yeah let's say that you have free reign to impact any service you want got it um and did you have a specific segment of users in mind or a market or is that also up for up for me to decide yeah that's a good clarifying question i'd say it's up to you and if you pick a specific segment maybe you can let me know how you prioritize that yeah awesome um and then this is interesting because you mentioned like top-line bookings and so interesting if we should think about should we increase bookings by attracting new users are we trying to increase the frequency of bookings for existing users also happy to decide but want to see if you had a point of view yeah i don't have a specific point that i want to go towards so either new or existing users whichever one you think gets us the most roi okay um and then yeah any any other constraints i should be aware of or you know free or free reign on that as well um yeah i'd love to hear like any number of ideas you have but maybe we can keep the timeline at like a two year horizon okay that sounds good um so to make sure i think i structure kind of our conversation properly um you mine give me a moment so i could kind of think through what the the right structure and framework is yeah for sure yeah so let me do i think a little bit of sign posting on how i think i'm gonna try to work through this problem um essentially i think it's it's four steps so i think step number one let's just start by defining i think what success looks like so yes obviously you could say success is increasing bookings but there's a million possible ways we could move this metric you can you can imagine we could spam customers with notifications we could lower prices on listings in an unsustainable way but you know all these tactics are value destructive um but i do like starting with the defining what success looks like because it forces us to identify what problem we're trying to solve for our customers and whether you know we're uniquely aligned um with airbnb's overall mission um so step two you know let's segment those users and identify their pain points and prioritize them step three i think we'd love to do some brainstorming you know what are some hypotheses we have for how we get us to this this good outcome uh and then step four is you know let's talk about what problem do we prioritize solving what's our solution and if we have time at the end we'll talk to you about what data we look at to verify that we're doing the right things uh i'll pause there how does this how's this approach down to you um anything you'd like to add or any additional details yeah this approach sounds good let's get into it yeah all right so step number one uh which i think i have written here is defining success um so to define what a good outcome is let's think about what problem airbnb is uniquely positioned to solve for its customers in my mind i think the unique value airbnb provides is that it's the best possible way to experience travel that's i think unique and authentic to the destination you're going to so if you think about their history a little bit started with you know crashing on someone's couch on people's homes and yes that was a cheaper alternative than staying at you know some faceless hotel chain but they did a really great job of framing that experience in a way uh where you got to like really immerse yourself in the culture and the lifestyle that community and this is a bit of a ramble but i think i mentioned that early because i think as we start brainstorming pain points and solutions it'd be good for us to keep in mind that our original ethos and and mission statement um so let me write that down really quick just so i don't lose my train of thought um and specifically the mission is you know we want users to experience travel authentically um and so back to our good outcome uh beyond i think our good outcome beyond just like moving this bookings metric i think is that i think what we really want to accomplish is that when whenever someone wants to travel hopefully airbnb is more frequently the service that's top of mind for them because they know that it's the best possible service to um experience this unique and authentic experience but it's kind of cool right like in a way we've sort of reframed the question um we're not just increasing bookings in absolute terms what we're really trying to do is you know people are traveling probably like three or four times a year maybe and what we really want to do is of those three or four times let's make sure airbnb is the service that's top of mind for them because of the unique experiences we provide so i think if we had to define a northstar metric it's essentially i think increasing annual bookings per user um per year um and that's really kind of like our indicator of whether or not airbnb is sort of offering the best possible um experience um i'll pause it does that does that logic sort of track track with you yeah that makes sense if you were to kind of break that down into maybe like a specific formula would there be something that you would be looking at like maybe optimizing for quantity of knights or something else yeah i guess i guess that's a good question about what we define as a booking right um so yeah maybe we could dig into it in my mind initially it was just bookings as like one unit irrespective of how long it was but to your point yeah there are reasons to kind of track knight stayed on airbnb so i'll rephrase actually i like that our north star should really be in a given year how how many nights is someone staying on airbnb that's a good point appreciate you for pointing that out cool yeah um and you know i'll mention too because this aligns with kind of our north star metric um the important thing to keep in mind is that like i think travel is seasonal and has natural plateaus so hypothetically if someone is booking three or four times a year staying at airbnb like 10 to 14 times a year max it's probably not realistic for us to assume that organ makes such drastic of a change where they're suddenly staying 30 40 100 nights a year so uh let's let's keep that in mind as well um with that i think we could talk about i think customers and their pain points that sound good to you yeah yeah sounds good yeah um might give me a minute to think about this i kind of kind of want to think through what the right segmentation is cool yeah so if it's all right with you kevin i think for the sake of time uh just to add some guardrails here i i'll focus primarily on guests for now airbnb 2 side marketplace but um i want to focus on the guest experience if that's all right with you but obviously like whatever we do for the guest we should be mindful that like whatever recommendations we provide doesn't obviously impact the host side does that sound good to you before i talk about segmentation yeah yeah that sounds good yeah and i think there's a lot of different ways we could segment um but i think i gravitated towards sort of these two dimensions um we could talk about this dimension of business travel versus leisure travel where leisure travel is just someone booking a trip for fun and business travel is you know you're booking a trip for work sometimes through your employer who have partnerships with hotel chains et cetera and then the second intent is someone that's a high intent traveler versus a low intent traveler and i think what i mean by high intent is that this is someone that's at this very moment um looking to actively book travel right now whereas low intent travel is someone that's used airbnb before but probably not traveling isn't super act of mine top of mind for them they probably don't even have the airbnb app kind of downloaded on their phone at this very moment got it and just to clarify a little bit so this is high intent to travel not high intent to use airbnb when they travel yeah high intent to travel yeah i intend to travel in general um yeah and i'll note too i think we could have segmented on a lot of different dimensions we could have done solo versus group travel probably could segment it by like age who have different travel expectations like millennials versus um gen z boomers etc i think i gravitated towards this because like i think without any data in front of me just have some intuition but i think the calculus would be a little different like you know had a data science team and things like that um so with that said i think the next thing we should talk about is probably which segment should we kind of target and prioritize and why and when i was kind of going through going through this my intuition tells me that we should rule out business travelers i think for the following reasons i think yes they're a new kind of target market it could be really exciting but there are also the sort of travelers who i don't think value the sort of authenticity and uniqueness that airbnb provides going back to kind of our unique core value they value convenience and they're probably better served by i think hotel chains that their companies might already have existing relationships with and i think it's also it'd be a pretty risky bet strategically for airbnb to onboard you know a totally new type of supply just to cater to this new demographic so you know i think it makes sense for us to stick with i think airbnb's original market which is leisure um but now the debate is high intent people actively looking to travel and book right now versus low intent which is you know not really thinking about travel etc yeah yeah that makes sense to kind of think more about the leisure side i can definitely imagine for business side a lot of these people are already set on hey i want to earn my status or my points through these hotel chains i want to get room service and it's going to be really hard to change the behavior of hosts who majority of them are probably very hands-off when it comes to uh booking between chicken and checkout so yeah um yeah let's definitely focus on the leisure yeah and then now i'm debating between i think high intent versus low intent thinking about high intent a little bit let's go through their pain points um so if i'm a high intent traveler i already have a set date i like where i have a destination and right now i'm really just looking for listings and experiences and i think they're considering things like best price location etc and i think of a lot of resolving those pain points will likely involve you know reducing price of listings improving supply improving discovery or really just like reducing any sort of friction along that user journey of finding a place to actually purchasing um which i think these are kind of things that airbnb is like already kind of actively invested in and i would say that you know for these high intent users that user journey can start on google or kayak or expedia and really if you look at all those three things i have listed or those four things i've listed which is price um uh supply discovery and uh reducing friction on that journey the only one that i think airbnb has a unique advantage in is the kind of supply of local authentic listings now with that said as i was thinking i think the interesting opportunity for us to at least explore is the actual low intent travelers which is these are the folks who right now aren't actively planning their next trip but at some point these low intent travelers become high intent travelers and we talked about our good outcome of making airbnb more top of mind i think the question can be framed then as what pain points can we solve for low intent travelers currently so that when it does come for them to travel airbnb is sort of the top of mind choice for them um which is sort of interesting but uh anything you'd like to add before i kind of think through my my recommendation yeah um i think this is definitely a there's merit to to breaking down the segmentation in high intent to travel versus low intent to travel i think um one question i have is just wouldn't there have to be a lot of macro um events to for someone to convert from low intent to high intent maybe they have to earn more salary or covid has to go away is there some other way for us to target a user segment us user segment where we have more control over oh as in there are a lot of different factors that could influence whether or not someone has the intent to travel right let's say we we have some strategy that targets all these people who have no intention to travel but we think they're gonna become people with intention to travel in the future um i feel like there's there's a lot of uh macro economic things that would have to happen in order for some of these low intense people to become high intent travelers and if these things don't happen then all of these investments would go to waste yeah i i agree with that i which is why i think i was a little reluctant to go with low intent but i actually arrived at and maybe i'm jumping ahead a little bit in terms of solution but it's i don't think our strategy is to all of a sudden turn a low intent traveler into a high intent traveler like you said there's a lot of things that go into that it's a very gradual process but i think what was interesting for me was um right now airbnb is very much this ad hoc tool that you only go to when you want to search and when you want to kind of book travel what's kind of interesting is in terms of like a strategy that i wanted to explore a little bit was can we sort of change the interaction model with airbnb where instead of just being an ad hoc tool it's more of a destination maybe a place you can learn more about kind of different areas maybe a place where you find travel inspiration give them a reason to come that's not just booking travel so that when it comes time to travel um airbnb's are the brand that's more top of mind um that's sort of what i'm thinking i would like to go down that route but if you think this is totally bananas i'm happy to kind of uh step back and consider something else yeah maybe it'll be helpful for me to understand like what's an example of a low intent traveler maybe like a persona yeah um i guess it'd be someone like me where uh i i guess like i would imagine let's think of this where probably a bunch of new year's resolutions this year to travel more i know someone like me made that sort of new year's resolution but i know for someone like me um i don't really know where to start and i don't necessarily want the kind of generic itinerary of going to like paris to seeing the eiffel tower not to disparage people who want to do that i would love to do that personally but sort of harking back to the original kind of good outcome which is why would i use airbnb it's like it's a place i could have a really unique and awesome trip that's not just your cookie cutter hotel chain okay where do i start and can i find inspiration for that that's not just googling a bunch of million different blogs and then can i find that at the site that i'm ultimately gonna book um that was something that kind of got me excited but okay yeah yeah that makes sense so i guess like we're thinking about someone who um doesn't actively make plans maybe one or two years out for like hey like i already know this year i'm gonna go here or next year i already know i'm gonna go there um they're probably a little hands-off when it comes to or more passive when it comes to travel planning um and we we wanna see how we can convert them into being active airbnb users so that we can improve or increase the number of nights booked right yeah and granted it sounds like a risky strategy right because essentially what what you're doing is you're essentially turning airbnb a little bit into like a content company um but you know happy to kind of talk through my logic of i think naturally like with any sort of strategy question right we would want to have an mvp have a hypothesis dip our tone it first before let's just shove 50 engineers in here and and build it um happy to talk through how i would approach that but yeah how would you like to to guide this conversation yeah yeah i i think now that um we're on the same page about what the low intent traveler is and why we think this is a good place to make a bet i'd love to hear where you would go from here yeah and so this is one of those things where i think we should just be very crisp about what our hypothesis is and how we test it before we kind of make any really big investments um and so i think here's sort of what i'm thinking i think the the premise of this entire strategy is predicated on a belief that if people visit airbnb more frequently just to browse or do whatever sort of activity then when it does come time for them to travel they'll book with us more often um and that's probably data airbnb has already i think that's the sort of analysis i would do first which is specifically for users who visit airbnb you know x number of times how does that correlate with them booking with airbnb you know why weeks later and do we see a positive correlation there because i think once we have that as a foundation then the question turns more into strategy and product which is okay what can what services can we provide to bring people um to airbnb um is that that logic track for you yeah totally so i have three options i think in mind um and i'll name them now and then we'll talk about how how we could think about prioritizing them i think uh one is to kind of redesign the listings page to kind of feature the hosts and their stories more so you know airbnb area has this feature where they designate super hosts and i'm curious if highlighting personal stories or differentiate their listings more can you know not only attract more bookings but give people a reason to come like i'm almost like read a blog and uh you know and then obviously people will come visit airbnb more top of mind when they want to travel the second one involves sort of social and user generated content i think this is where we could prompt people after they visit to post photos of the really great trip they had um full disclosure not a big fan of this one uh i think there could be a you know one i think it's a tall ask to ask people to kind of post photos and things on another service uh besides the one they're using and i think it gets a little bit into like unhealthy fomo aspects that kind of distracts from airbnbs or original ethos um the third one i thought of was actually um making their like add to wishlist experience richer and more personalized and more useful um you can imagine something that's sort of like a pinterest experience that's tailored towards travel destinations and activities um those are kind of like three high-level directions and i think they're pretty substantial investments but i'll talk about which one i'll i think i want to tackle and then we can talk about the mvp of that one um for which direction um and essentially i think my rough prioritization framework is essentially of the options we have what's the expected impact towards getting us to our good outcome as well as like what's the expected cost of delivering this outcome um i think for the sake of this conversation i'm actually pretty fired up about the third option which is expanding the wishlist experience and here's my reasoning uh what's nice about that the wishlist experience is that one that experience already exists that functionality already exists and we're just extending it but two it's it's a non-dominant sort of user journey which i think gives us a lot more flexibility to experiment with different experiences without massively disrupting users and granted like i mentioned earlier building like a pinterest like experience is a pretty heavy strategic investment you're retooling the entire wish list experience but um we should talk about i think a little more scoped down mvp of how we would build this i think um so would this be uh like how would this be different than the social user generated one because when when i'm hearing like oh it's like pinterest um does it i kind of have like the same feed or what's the vision here oh yeah i'm sorry i should have clarified um the the pinterest wouldn't be sort of like a generic it wouldn't be user generated content it'd sort of be restructuring how um you could interact with kind of the listings page so right now it's sort of static pages that show you something but it's like changing the ui in a way where um you could show uh just make browsing i think i i think really the the strategy is just make make airbnb more indexed towards like a browsing experience rather than a high intent search experience i guess so did that make sense um i feel like if it's not clear how i'm paying the picture please please let me know yeah so um maybe you can walk me through what this user experience would look like like if i'm a user and i come to the website what do i see yeah i think when you come to the website um instead of just offering you the ability to search um we call it the wishlist experience and so you would still have the high intent like plan your booking travel here but off to the side you have oh would you like to explore and when you hit the explorer you have like a sort of different experience that's like i would imagine like much more immersive um you could scroll through kind of like beautiful listings and destinations it in my head it kind of looks like a uh inspo page almost um to really kind of play up the like this is you have one part of the app which is the core app which is like this is where you book and then one part of the app which is um this is where you kind of can browse and explore and find inspiration for your next trip and all the wishlist and tooling involved with that yeah thank you for having me clarify yeah yeah makes a lot of sense there so um yeah i mean i think this sounds interesting and i'm wondering maybe in the few minutes we have remaining um do you have any sort of launch strategy that you would keep in mind when you're placing this huge bet yeah i would not just launch um a this like right away i think we'd have to scope it down a little more um i think the one i'd have in mind too is like we we have some some uh way of highlighting that there is like a different explore experience um you know when uh oh actually no i think i think fundamentally we we want to introduce users to the fact that we are um gonna invest in an exploration experience so actually this seems counterintuitive but i think i would actually send out a newsletter to inactive users highlighting here are some of the unique experiences we have on airbnb um and that's kind of nice because i think most the engineering work would actually be sending up the logging and tweaking some of airbnb's email outreach infrastructure we have the marketing team generate some content and i don't think the content needs to be personalized to each user necessarily either but it should highlight like here are some really cool experiences that's unique to airbnb and we could and i think our success metric is how often are people clicking on this newsletter like is this is the prospect of exploring more listings and proactive suggestion of exploring more listings um attractive and appealing um and then from there once they click on the listing we could actually monitor like how do users navigate around airbnb after they click on it when they click on it and you show the listing do they then search for related trips and experiences i think then maybe that gives us some signal on oh maybe proactive suggestions is is a good investment um does the newsletter prompt them to kind of favorite that listing and add to their wish list then it's oh maybe we should invest a little more in the wishlist experience um so to summarize i think my recommendation would be start small with a newsletter that goes out to existing users see how engagement with that newsletter drives engagement with airbnb see how engagement with airbnb leads to an increase in kind of night stayed per per user per year which is our north star metric and then understand how users behave after they tap this newsletter and arrive at the airbnb page and that could give a signal on where to invest more in a more exploratory browsy experience yeah it makes sense i can definitely see how this can help people inspire some of those more passive users to explore more um cool i i think this is good for our mock interview here so i'll pause here um and i'll dive into a little bit of feedback and maybe at the end you can give the viewers some advice on how they could tackle similar product strategy questions so i really liked how you started off with defining success and you talked about not only like this user segmentation about like high intent low intent business leisure but you also called out all these other segments that you could have segmented by like such as age um so i thought that was really good to hear some of your other thinking and why you didn't pursue some of the other paths um i i think i specifically went out of my way to try to poke holes and try to give you a lot of pushback and i believe you handled that pretty gracefully i think there were like two or three places where i really like pushed you and um it definitely shows that you really believe in what you're talking about so um always good to have that as a trait in an interview also i think it just shows in your in your answer that you know even though you yourself you're not a big traveler you're able to take this travel question and add substantial color to it um and and kind of put your own twist on it in the sense that uh you know like even at the end like i could tell that you know this could be a nice product that people could use to kind of inspire themselves to travel so um all in all thanks for your time for answering this product strategy question and if you have any tips for the audience i think that would be awesome for us to hear that right now yeah and i think for me one strategy questions are really hard and i've always been candid like i don't know even if that is a great strategy the one articulated but i think the interview advice that i've received in the past that's been really helpful is they're not looking for you to be quote unquote right in the 45 minutes you have they want to know like is this someone that's a principal thinker can they get feedback can i see them actually having this conversation with them as like a colleague so i actually really appreciate your feedback kevin because it was like oh no this does change my thinking oh i didn't articulate that very well um i think the second two was like i know interviews are daunting but try to have fun with it too because you know this i meant putting yourselves in the interview shoes they have a ton of work they gotta do they have to do 45 minutes of this then they have to like write up the feedback like do as much as you can be high energy and make that 45 minutes enjoyable for them um and you know it's surprisingly effective but um yeah i'm rambling but yeah kevin this was i had fun i hope you had fun absolutely and i think this is really valuable for the users so for the viewers who are watching at home this is definitely really good advice i think very similar to a lot of other interviews it's not about the specific answer it doesn't matter if the question is like design an alarm clock for the elderly or whatever it's not the specific answer it's more about the conversation you have with the interviewer and how you get to your approach so yeah good luck with your upcoming pm interview and hope this mock interview was helpful thanks thanks so much for watching don't forget to hit the like and subscribe buttons below to let us know that this video is valuable for you and of course check out hundreds more videos just like this at tryexponent.com thanks for watching and good luck on your upcoming interview [Music] "
+        }
+      }
+    ],
+    "Get Video Transcript": [
+      {
+        "json": {
+          "search_metadata": {
+            "id": "search_JBAO2bkaoPuNaz3mZ4n7XajE",
+            "status": "Success",
+            "created_at": "2025-08-18T12:06:04Z",
+            "request_time_taken": 2.49,
+            "parsing_time_taken": 0,
+            "total_time_taken": 2.49,
+            "request_url": "https://www.youtube.com/watch?v=OUyjQOj83Uw",
+            "html_url": "https://www.searchapi.io/api/v1/searches/search_JBAO2bkaoPuNaz3mZ4n7XajE.html",
+            "json_url": "https://www.searchapi.io/api/v1/searches/search_JBAO2bkaoPuNaz3mZ4n7XajE"
+          },
+          "search_parameters": {
+            "engine": "youtube_transcripts",
+            "video_id": "OUyjQOj83Uw",
+            "lang": "en"
+          },
+          "transcripts": [
+            {
+              "text": "let's say you're a pm at airbnb how would you increase bookings [Music]",
+              "start": 0.24,
+              "duration": 6.72
+            },
+            {
+              "text": "hey everyone welcome back to another exponent product manager mock interview my name is kevin way and on today's show",
+              "start": 6.96,
+              "duration": 6.24
+            },
+            {
+              "text": "we have phil phil's going to be going through a strategy question today and before we go into that phil do you mind",
+              "start": 13.2,
+              "duration": 5.839
+            },
+            {
+              "text": "just telling the audience a little bit about who you are yeah well hey everyone my name is phil",
+              "start": 19.039,
+              "duration": 5.521
+            },
+            {
+              "text": "i'm currently a product manager at google working on android messages which is",
+              "start": 24.56,
+              "duration": 5.28
+            },
+            {
+              "text": "for those of you who don't have an android the pre-installed texting app on almost every android device",
+              "start": 29.84,
+              "duration": 5.12
+            },
+            {
+              "text": "and i'm the pm responsible for the actual conversation experience so ultimately the team tries to answer what",
+              "start": 34.96,
+              "duration": 6.8
+            },
+            {
+              "text": "does it really mean for you to feel connected to the people you're talking to and what sort of experiences can we",
+              "start": 41.76,
+              "duration": 5.68
+            },
+            {
+              "text": "build to deliver that before that i started my career at google on the youtube ads team where i got to build",
+              "start": 47.44,
+              "duration": 5.36
+            },
+            {
+              "text": "youtube tv's advertising platform so um yeah that's that's me in a nutshell thanks for having me on today kevin",
+              "start": 52.8,
+              "duration": 6.239
+            },
+            {
+              "text": "really excited to do this with you absolutely and thanks for your time to come on the show so",
+              "start": 59.039,
+              "duration": 5.439
+            },
+            {
+              "text": "like i mentioned we're doing a product strategy question for today's mock so this is a question i'd like to ask for today's mock let's say you're a pm at",
+              "start": 64.479,
+              "duration": 6.801
+            },
+            {
+              "text": "airbnb how would you increase bookings hmm how would i increase bookings for",
+              "start": 71.28,
+              "duration": 6.479
+            },
+            {
+              "text": "airbnb uh i have some thoughts uh but you know just to make sure we're kind of making",
+              "start": 77.759,
+              "duration": 6.801
+            },
+            {
+              "text": "the right assumptions and discussing this at the right level of altitude can i can i ask you some clarifying",
+              "start": 84.56,
+              "duration": 5.68
+            },
+            {
+              "text": "questions of course yeah um so i",
+              "start": 90.24,
+              "duration": 5.12
+            },
+            {
+              "text": "i do want to understand i think my role in this scenario a little bit so do i own a specific part of the airbnb",
+              "start": 95.36,
+              "duration": 5.6
+            },
+            {
+              "text": "experience or can i assume that i'm setting a sort of holistic strategy that can impact multiple surfaces on airbnb",
+              "start": 100.96,
+              "duration": 6.96
+            },
+            {
+              "text": "yeah let's say that you have free reign to impact any service you want got it um and did you have a specific",
+              "start": 107.92,
+              "duration": 8.239
+            },
+            {
+              "text": "segment of users in mind or a market or is that also up for up for me to decide",
+              "start": 116.159,
+              "duration": 5.441
+            },
+            {
+              "text": "yeah that's a good clarifying question i'd say it's up to you and if you pick a specific segment maybe you can let me",
+              "start": 121.6,
+              "duration": 5.44
+            },
+            {
+              "text": "know how you prioritize that yeah awesome um and then",
+              "start": 127.04,
+              "duration": 5.6
+            },
+            {
+              "text": "this is interesting because you mentioned like top-line bookings and so",
+              "start": 132.64,
+              "duration": 5.599
+            },
+            {
+              "text": "interesting if we should think about should we increase bookings by attracting new users are we trying to",
+              "start": 138.239,
+              "duration": 5.441
+            },
+            {
+              "text": "increase the frequency of bookings for existing users also happy to decide but want to see if you had a point of view",
+              "start": 143.68,
+              "duration": 6.88
+            },
+            {
+              "text": "yeah i don't have a specific point that i want to go towards so either new or existing users whichever",
+              "start": 150.56,
+              "duration": 5.44
+            },
+            {
+              "text": "one you think gets us the most roi okay um and then",
+              "start": 156,
+              "duration": 5.76
+            },
+            {
+              "text": "yeah any any other constraints i should be aware of or you know free or free reign on that as well um yeah i'd love",
+              "start": 161.76,
+              "duration": 6.24
+            },
+            {
+              "text": "to hear like any number of ideas you have but maybe we can keep the timeline at like a two year horizon",
+              "start": 168,
+              "duration": 6.64
+            },
+            {
+              "text": "okay that sounds good um so to make sure i think i structure kind of",
+              "start": 174.64,
+              "duration": 5.76
+            },
+            {
+              "text": "our conversation properly um you mine give me a moment so i could kind of think through what the the right",
+              "start": 180.4,
+              "duration": 5.919
+            },
+            {
+              "text": "structure and framework is yeah for sure",
+              "start": 186.319,
+              "duration": 3.84
+            },
+            {
+              "text": "yeah so let me do i think a little bit of sign posting on how i think i'm gonna",
+              "start": 193.44,
+              "duration": 5.76
+            },
+            {
+              "text": "try to work through this problem um essentially i think it's it's four steps so",
+              "start": 199.2,
+              "duration": 5.119
+            },
+            {
+              "text": "i think step number one let's just start by defining i think what success looks like so",
+              "start": 204.319,
+              "duration": 5.041
+            },
+            {
+              "text": "yes obviously you could say success is increasing bookings but there's a million possible ways we could move this",
+              "start": 209.36,
+              "duration": 6.4
+            },
+            {
+              "text": "metric you can you can imagine we could spam customers with notifications we could lower prices on listings in an",
+              "start": 215.76,
+              "duration": 6.16
+            },
+            {
+              "text": "unsustainable way but you know all these tactics are value destructive um but i do like starting with the defining what",
+              "start": 221.92,
+              "duration": 5.84
+            },
+            {
+              "text": "success looks like because it forces us to identify what problem we're trying to solve for",
+              "start": 227.76,
+              "duration": 5.119
+            },
+            {
+              "text": "our customers and whether you know we're uniquely aligned um with airbnb's",
+              "start": 232.879,
+              "duration": 5.36
+            },
+            {
+              "text": "overall mission um so step two you know let's segment those users and identify",
+              "start": 238.239,
+              "duration": 5.761
+            },
+            {
+              "text": "their pain points and prioritize them step three i think we'd love to do some brainstorming you know what are some",
+              "start": 244,
+              "duration": 6.319
+            },
+            {
+              "text": "hypotheses we have for how we get us to this this good outcome uh and then step",
+              "start": 250.319,
+              "duration": 6.401
+            },
+            {
+              "text": "four is you know let's talk about what problem do we prioritize solving what's our solution and if we have time at the",
+              "start": 256.72,
+              "duration": 6.32
+            },
+            {
+              "text": "end we'll talk to you about what data we look at to verify that we're doing the right things uh i'll pause there how",
+              "start": 263.04,
+              "duration": 5.92
+            },
+            {
+              "text": "does this how's this approach down to you um anything you'd like to add or any additional details yeah this approach",
+              "start": 268.96,
+              "duration": 5.92
+            },
+            {
+              "text": "sounds good let's get into it yeah all right so step number one uh which i think i have written here is",
+              "start": 274.88,
+              "duration": 6.56
+            },
+            {
+              "text": "defining success um so to define what a good outcome is let's",
+              "start": 281.44,
+              "duration": 5.92
+            },
+            {
+              "text": "think about what problem airbnb is uniquely positioned to solve for its customers",
+              "start": 287.36,
+              "duration": 7.44
+            },
+            {
+              "text": "in my mind i think the unique value airbnb provides is that",
+              "start": 294.8,
+              "duration": 5.44
+            },
+            {
+              "text": "it's the best possible way to experience travel that's i think unique and authentic to the",
+              "start": 300.24,
+              "duration": 6.08
+            },
+            {
+              "text": "destination you're going to so if you think about their history a little bit started with you know crashing on",
+              "start": 306.32,
+              "duration": 5.439
+            },
+            {
+              "text": "someone's couch on people's homes and yes that was a cheaper alternative than staying at you know some faceless hotel",
+              "start": 311.759,
+              "duration": 5.521
+            },
+            {
+              "text": "chain but they did a really great job of framing that experience in a way uh where you got to like really immerse",
+              "start": 317.28,
+              "duration": 5.919
+            },
+            {
+              "text": "yourself in the culture and the lifestyle that community and this is a bit of a ramble but i think i mentioned that early because i",
+              "start": 323.199,
+              "duration": 6.641
+            },
+            {
+              "text": "think as we start brainstorming pain points and solutions it'd be good for us to keep in mind that our original ethos",
+              "start": 329.84,
+              "duration": 7.199
+            },
+            {
+              "text": "and and mission statement um so let me write that down really quick just so i don't lose my train of thought",
+              "start": 337.039,
+              "duration": 8
+            },
+            {
+              "text": "um and specifically the mission is you know we want users to experience travel authentically",
+              "start": 345.039,
+              "duration": 5.801
+            },
+            {
+              "text": "um and so back to our good outcome uh beyond i think our good outcome beyond",
+              "start": 350.84,
+              "duration": 6.6
+            },
+            {
+              "text": "just like moving this bookings metric i think is that",
+              "start": 357.44,
+              "duration": 5.36
+            },
+            {
+              "text": "i think what we really want to accomplish is that when whenever someone wants to travel hopefully airbnb is more frequently the",
+              "start": 362.8,
+              "duration": 7.04
+            },
+            {
+              "text": "service that's top of mind for them because they know that it's the best possible service to",
+              "start": 369.84,
+              "duration": 5.6
+            },
+            {
+              "text": "um experience this unique and authentic experience but it's kind of cool right like in a way",
+              "start": 375.44,
+              "duration": 5.52
+            },
+            {
+              "text": "we've sort of reframed the question um we're not just increasing bookings in",
+              "start": 380.96,
+              "duration": 5.519
+            },
+            {
+              "text": "absolute terms what we're really trying to do is you know people are traveling probably like",
+              "start": 386.479,
+              "duration": 5.28
+            },
+            {
+              "text": "three or four times a year maybe and what we really want to do is of those three or four times let's make sure",
+              "start": 391.759,
+              "duration": 5.681
+            },
+            {
+              "text": "airbnb is the service that's top of mind for them because of the unique experiences we provide",
+              "start": 397.44,
+              "duration": 6.479
+            },
+            {
+              "text": "so i think if we had to define a northstar metric it's essentially i think",
+              "start": 403.919,
+              "duration": 7.68
+            },
+            {
+              "text": "increasing annual bookings per user um per year um",
+              "start": 411.599,
+              "duration": 6.72
+            },
+            {
+              "text": "and that's really kind of like our indicator of whether or not airbnb is sort of offering the best possible um",
+              "start": 418.319,
+              "duration": 6.401
+            },
+            {
+              "text": "experience um i'll pause it does that does that logic sort of track track with you yeah that makes sense if you were to",
+              "start": 424.72,
+              "duration": 6
+            },
+            {
+              "text": "kind of break that down into maybe like a specific formula would there be something that you would be looking at like maybe",
+              "start": 430.72,
+              "duration": 6.16
+            },
+            {
+              "text": "optimizing for quantity of knights or something else",
+              "start": 436.88,
+              "duration": 5.599
+            },
+            {
+              "text": "yeah i guess i guess that's a good question about what we define as a booking right um",
+              "start": 442.72,
+              "duration": 7.28
+            },
+            {
+              "text": "so yeah maybe we could dig into it in my mind initially it was just",
+              "start": 450,
+              "duration": 5.039
+            },
+            {
+              "text": "bookings as like one unit irrespective of how long it was but to your point yeah there are reasons to kind of track",
+              "start": 455.039,
+              "duration": 7.201
+            },
+            {
+              "text": "knight stayed on airbnb so i'll rephrase actually i like that our north star should really be in a given year how how",
+              "start": 462.24,
+              "duration": 7.359
+            },
+            {
+              "text": "many nights is someone staying on airbnb that's a good point appreciate you for pointing that out cool",
+              "start": 469.599,
+              "duration": 6.72
+            },
+            {
+              "text": "yeah um and you know i'll mention too because this aligns with kind of our north star",
+              "start": 476.319,
+              "duration": 5.761
+            },
+            {
+              "text": "metric um the important thing to keep in mind is that like i think travel is seasonal and has natural plateaus so",
+              "start": 482.08,
+              "duration": 7.28
+            },
+            {
+              "text": "hypothetically if someone is booking three or four times a year staying at airbnb like 10 to 14 times a year max",
+              "start": 489.36,
+              "duration": 7.2
+            },
+            {
+              "text": "it's probably not realistic for us to assume that organ makes such drastic of a change where they're suddenly staying",
+              "start": 496.56,
+              "duration": 5.44
+            },
+            {
+              "text": "30 40 100 nights a year so uh let's let's keep that in mind as well um",
+              "start": 502,
+              "duration": 6.4
+            },
+            {
+              "text": "with that i think we could talk about i think customers and their pain points that sound good to you yeah yeah sounds",
+              "start": 508.4,
+              "duration": 6.079
+            },
+            {
+              "text": "good yeah um might give me a minute to think about this i kind of kind of want to",
+              "start": 514.479,
+              "duration": 5.12
+            },
+            {
+              "text": "think through what the right segmentation is cool",
+              "start": 519.599,
+              "duration": 5.36
+            },
+            {
+              "text": "yeah so if it's all right with you kevin i think for the sake of time uh",
+              "start": 528.399,
+              "duration": 6.081
+            },
+            {
+              "text": "just to add some guardrails here i i'll focus primarily on guests for now",
+              "start": 534.48,
+              "duration": 6.4
+            },
+            {
+              "text": "airbnb 2 side marketplace but um i want to focus on the guest experience if that's all right with you but",
+              "start": 540.88,
+              "duration": 6.399
+            },
+            {
+              "text": "obviously like whatever we do for the guest we should be mindful that like whatever recommendations we provide doesn't",
+              "start": 547.279,
+              "duration": 5.601
+            },
+            {
+              "text": "obviously impact the host side does that sound good to you before i talk about segmentation yeah yeah that sounds good",
+              "start": 552.88,
+              "duration": 6.639
+            },
+            {
+              "text": "yeah and i think there's a lot of different ways we could segment um",
+              "start": 559.519,
+              "duration": 6.32
+            },
+            {
+              "text": "but i think i gravitated towards sort of these two dimensions um",
+              "start": 565.839,
+              "duration": 6.081
+            },
+            {
+              "text": "we could talk about this dimension of business travel versus leisure travel where leisure travel is just someone",
+              "start": 571.92,
+              "duration": 5.919
+            },
+            {
+              "text": "booking a trip for fun and business travel is you know you're booking a trip for work sometimes through your employer",
+              "start": 577.839,
+              "duration": 5.041
+            },
+            {
+              "text": "who have partnerships with hotel chains et cetera and then the second intent is",
+              "start": 582.88,
+              "duration": 5.44
+            },
+            {
+              "text": "someone that's a high intent traveler versus a low intent traveler and i think what i mean by high intent is that this",
+              "start": 588.32,
+              "duration": 6.16
+            },
+            {
+              "text": "is someone that's at this very moment um looking to actively book travel right",
+              "start": 594.48,
+              "duration": 5.68
+            },
+            {
+              "text": "now whereas low intent travel is someone that's used airbnb before but probably not traveling isn't super act",
+              "start": 600.16,
+              "duration": 7.359
+            },
+            {
+              "text": "of mine top of mind for them they probably don't even have the airbnb app kind of downloaded on their phone at",
+              "start": 607.519,
+              "duration": 5.201
+            },
+            {
+              "text": "this very moment got it and just to clarify a little bit so this is high intent to travel not",
+              "start": 612.72,
+              "duration": 6.48
+            },
+            {
+              "text": "high intent to use airbnb when they travel yeah high intent to travel yeah i intend",
+              "start": 619.2,
+              "duration": 6.079
+            },
+            {
+              "text": "to travel in general um yeah and i'll note too i think we could have segmented on a lot of",
+              "start": 625.279,
+              "duration": 6.24
+            },
+            {
+              "text": "different dimensions we could have done solo versus group travel probably could segment it by like age",
+              "start": 631.519,
+              "duration": 5.76
+            },
+            {
+              "text": "who have different travel expectations like millennials versus um gen z boomers",
+              "start": 637.279,
+              "duration": 5.201
+            },
+            {
+              "text": "etc i think i gravitated towards this because like i think without any data in front of me",
+              "start": 642.48,
+              "duration": 5.919
+            },
+            {
+              "text": "just have some intuition but i think the calculus would be a little different like you know had a data science team and things like that um",
+              "start": 648.399,
+              "duration": 7.281
+            },
+            {
+              "text": "so with that said i think the next thing we should talk about is probably which segment should we kind of target",
+              "start": 655.68,
+              "duration": 6.96
+            },
+            {
+              "text": "and prioritize and why and when i was kind of going through going through this",
+              "start": 662.64,
+              "duration": 6.16
+            },
+            {
+              "text": "my intuition tells me that we should rule out business travelers i think for the following reasons",
+              "start": 668.8,
+              "duration": 6.96
+            },
+            {
+              "text": "i think yes they're a new kind of target market it could be really exciting but there",
+              "start": 675.76,
+              "duration": 6.16
+            },
+            {
+              "text": "are also the sort of travelers who i don't think value the sort of authenticity and uniqueness that airbnb",
+              "start": 681.92,
+              "duration": 5.84
+            },
+            {
+              "text": "provides going back to kind of our unique core value they value convenience and they're",
+              "start": 687.76,
+              "duration": 5.36
+            },
+            {
+              "text": "probably better served by i think hotel chains that their companies might already have existing relationships with",
+              "start": 693.12,
+              "duration": 7.04
+            },
+            {
+              "text": "and i think it's also it'd be a pretty risky bet strategically for airbnb to onboard you know a totally new type of",
+              "start": 700.16,
+              "duration": 7.119
+            },
+            {
+              "text": "supply just to cater to this new demographic so you know i think it makes sense for us to stick with i think",
+              "start": 707.279,
+              "duration": 5.841
+            },
+            {
+              "text": "airbnb's original market which is leisure um but now the debate is",
+              "start": 713.12,
+              "duration": 6.64
+            },
+            {
+              "text": "high intent people actively looking to travel and book right now versus low intent which is you know not really",
+              "start": 719.76,
+              "duration": 5.519
+            },
+            {
+              "text": "thinking about travel etc yeah yeah that makes sense to kind of think more about the leisure side i can",
+              "start": 725.279,
+              "duration": 6.24
+            },
+            {
+              "text": "definitely imagine for business side a lot of these people are already set on hey i want to earn my status or my",
+              "start": 731.519,
+              "duration": 5.12
+            },
+            {
+              "text": "points through these hotel chains i want to get room service and it's going to be really hard to change the behavior of hosts who majority of them",
+              "start": 736.639,
+              "duration": 6.801
+            },
+            {
+              "text": "are probably very hands-off when it comes to uh booking between chicken and checkout so yeah um yeah let's",
+              "start": 743.44,
+              "duration": 6.16
+            },
+            {
+              "text": "definitely focus on the leisure yeah and then now i'm debating between i think high intent versus low intent",
+              "start": 749.6,
+              "duration": 8.72
+            },
+            {
+              "text": "thinking about high intent a little bit let's go through their pain points um so if i'm a high intent traveler",
+              "start": 758.32,
+              "duration": 7.28
+            },
+            {
+              "text": "i already have a set date i like where i have a destination and right now i'm really just looking for",
+              "start": 765.6,
+              "duration": 6.16
+            },
+            {
+              "text": "listings and experiences and i think they're considering things like best price location etc",
+              "start": 771.76,
+              "duration": 6.8
+            },
+            {
+              "text": "and i think of a lot of resolving those pain points will likely involve",
+              "start": 778.56,
+              "duration": 5.36
+            },
+            {
+              "text": "you know reducing price of listings improving supply improving discovery or",
+              "start": 783.92,
+              "duration": 5.76
+            },
+            {
+              "text": "really just like reducing any sort of friction along that user journey of finding a place to actually purchasing",
+              "start": 789.68,
+              "duration": 5.599
+            },
+            {
+              "text": "um which i think these are kind of things that airbnb is like already kind of actively invested in",
+              "start": 795.279,
+              "duration": 7.281
+            },
+            {
+              "text": "and i would say that you know for these high intent users that user journey can start on google or",
+              "start": 802.56,
+              "duration": 6.959
+            },
+            {
+              "text": "kayak or expedia and really if you look at all those three things i have listed or those four",
+              "start": 809.519,
+              "duration": 6.161
+            },
+            {
+              "text": "things i've listed which is price um uh supply discovery and uh",
+              "start": 815.68,
+              "duration": 7.36
+            },
+            {
+              "text": "reducing friction on that journey the only one that i think airbnb has a unique advantage in is the kind of",
+              "start": 823.04,
+              "duration": 6.799
+            },
+            {
+              "text": "supply of local authentic listings now with that said as i was thinking i",
+              "start": 829.839,
+              "duration": 6.721
+            },
+            {
+              "text": "think the interesting opportunity for us to at least explore is the actual low intent travelers",
+              "start": 836.56,
+              "duration": 7.36
+            },
+            {
+              "text": "which is these are the folks who right now aren't actively planning their next trip",
+              "start": 843.92,
+              "duration": 5.359
+            },
+            {
+              "text": "but at some point these low intent travelers become high intent travelers and we talked about our good outcome of",
+              "start": 849.279,
+              "duration": 6.081
+            },
+            {
+              "text": "making airbnb more top of mind i think the question can be framed then",
+              "start": 855.36,
+              "duration": 5.68
+            },
+            {
+              "text": "as what pain points can we solve for low intent travelers currently so that when",
+              "start": 861.04,
+              "duration": 5.68
+            },
+            {
+              "text": "it does come for them to travel airbnb is sort of the top of mind choice",
+              "start": 866.72,
+              "duration": 5.84
+            },
+            {
+              "text": "for them um which is sort of interesting but uh anything you'd like to add before i kind",
+              "start": 872.56,
+              "duration": 6.079
+            },
+            {
+              "text": "of think through my my recommendation yeah um i think this is definitely a",
+              "start": 878.639,
+              "duration": 5.281
+            },
+            {
+              "text": "there's merit to to breaking down the segmentation in high intent to travel versus low intent to travel i think um",
+              "start": 883.92,
+              "duration": 8.08
+            },
+            {
+              "text": "one question i have is just wouldn't there have to be a lot of macro um events to for someone to convert from",
+              "start": 892,
+              "duration": 8.24
+            },
+            {
+              "text": "low intent to high intent maybe they have to earn more salary or covid has to go away",
+              "start": 900.24,
+              "duration": 5.92
+            },
+            {
+              "text": "is there some other way for us to target a user segment us user segment where we have more control over",
+              "start": 906.16,
+              "duration": 7.679
+            },
+            {
+              "text": "oh as in there are a lot of different factors that could influence whether or not someone has the intent to travel",
+              "start": 913.92,
+              "duration": 7.2
+            },
+            {
+              "text": "right let's say we we have some strategy that targets all these people who have no intention to travel but we think they're",
+              "start": 921.12,
+              "duration": 6.48
+            },
+            {
+              "text": "gonna become people with intention to travel in the future um i feel like there's there's a lot of",
+              "start": 927.6,
+              "duration": 6.72
+            },
+            {
+              "text": "uh macro economic things that would have to happen in order for some of these low intense people to become high intent travelers and if these things don't",
+              "start": 934.32,
+              "duration": 6.4
+            },
+            {
+              "text": "happen then all of these investments would go to waste yeah i i agree with that i",
+              "start": 940.72,
+              "duration": 6.32
+            },
+            {
+              "text": "which is why i think i was a little reluctant to go with low intent but i actually arrived at and maybe i'm jumping ahead a little bit in terms of",
+              "start": 947.04,
+              "duration": 6.08
+            },
+            {
+              "text": "solution but it's i don't think our strategy is to",
+              "start": 953.12,
+              "duration": 5.279
+            },
+            {
+              "text": "all of a sudden turn a low intent traveler into a high intent traveler like you said there's a",
+              "start": 958.399,
+              "duration": 6.481
+            },
+            {
+              "text": "lot of things that go into that it's a very gradual process but i think what was interesting for me",
+              "start": 964.88,
+              "duration": 5.84
+            },
+            {
+              "text": "was um right now airbnb is very much this ad hoc tool",
+              "start": 970.72,
+              "duration": 6.08
+            },
+            {
+              "text": "that you only go to when you want to search and when you want to",
+              "start": 976.8,
+              "duration": 5.039
+            },
+            {
+              "text": "kind of book travel what's kind of interesting is in terms of like a strategy that i",
+              "start": 981.839,
+              "duration": 5.521
+            },
+            {
+              "text": "wanted to explore a little bit was can we sort of change the interaction model with airbnb where instead of just being",
+              "start": 987.36,
+              "duration": 6.08
+            },
+            {
+              "text": "an ad hoc tool it's more of a destination maybe a place you can learn more about kind of different",
+              "start": 993.44,
+              "duration": 7.04
+            },
+            {
+              "text": "areas maybe a place where you find travel inspiration give them a reason to come that's not just booking travel so",
+              "start": 1000.48,
+              "duration": 5.599
+            },
+            {
+              "text": "that when it comes time to travel um airbnb's are the brand that's more top",
+              "start": 1006.079,
+              "duration": 5.921
+            },
+            {
+              "text": "of mind um that's sort of what i'm thinking i would like to go down that route but if you think this is totally",
+              "start": 1012,
+              "duration": 5.6
+            },
+            {
+              "text": "bananas i'm happy to kind of uh step back and consider something else yeah maybe it'll be helpful for me to",
+              "start": 1017.6,
+              "duration": 6.88
+            },
+            {
+              "text": "understand like what's an example of a low intent traveler maybe like a persona yeah um i guess it'd be someone like me",
+              "start": 1024.48,
+              "duration": 8.24
+            },
+            {
+              "text": "where uh i i guess like i would imagine let's think of this where",
+              "start": 1032.72,
+              "duration": 5.76
+            },
+            {
+              "text": "probably a bunch of new year's resolutions this year to travel more i know someone like me made that sort of new year's resolution",
+              "start": 1038.48,
+              "duration": 6.64
+            },
+            {
+              "text": "but i know for someone like me um i don't really know where to start",
+              "start": 1045.12,
+              "duration": 5.2
+            },
+            {
+              "text": "and i don't necessarily want the kind of generic itinerary of going to like paris to seeing the eiffel tower not to",
+              "start": 1050.32,
+              "duration": 5.84
+            },
+            {
+              "text": "disparage people who want to do that i would love to do that personally but sort of harking back to the original",
+              "start": 1056.16,
+              "duration": 7.2
+            },
+            {
+              "text": "kind of good outcome which is why would i use airbnb it's like it's a place i could have a really unique and awesome",
+              "start": 1063.36,
+              "duration": 5.76
+            },
+            {
+              "text": "trip that's not just your cookie cutter hotel chain okay where do i start and can i find",
+              "start": 1069.12,
+              "duration": 5.76
+            },
+            {
+              "text": "inspiration for that that's not just googling a bunch of million different blogs and then can i find that at the",
+              "start": 1074.88,
+              "duration": 6.24
+            },
+            {
+              "text": "site that i'm ultimately gonna book um that was something that kind of got me excited but okay yeah yeah",
+              "start": 1081.12,
+              "duration": 7.12
+            },
+            {
+              "text": "that makes sense so i guess like we're thinking about someone who um doesn't actively make plans maybe one or two",
+              "start": 1088.24,
+              "duration": 6.16
+            },
+            {
+              "text": "years out for like hey like i already know this year i'm gonna go here or next year i already know i'm gonna go there",
+              "start": 1094.4,
+              "duration": 5.279
+            },
+            {
+              "text": "um they're probably a little hands-off when it comes to or more passive when it comes to travel planning um and we we",
+              "start": 1099.679,
+              "duration": 6
+            },
+            {
+              "text": "wanna see how we can convert them into being active airbnb users so that we can improve or increase the number of nights",
+              "start": 1105.679,
+              "duration": 6.24
+            },
+            {
+              "text": "booked right yeah and granted it sounds like a risky strategy right because essentially what",
+              "start": 1111.919,
+              "duration": 6.081
+            },
+            {
+              "text": "what you're doing is you're essentially turning airbnb a little bit into like a content company um",
+              "start": 1118,
+              "duration": 5.76
+            },
+            {
+              "text": "but you know happy to kind of talk through my logic of i think naturally like with",
+              "start": 1123.76,
+              "duration": 5.12
+            },
+            {
+              "text": "any sort of strategy question right we would want to have an mvp have a hypothesis dip our",
+              "start": 1128.88,
+              "duration": 5.919
+            },
+            {
+              "text": "tone it first before let's just shove 50 engineers in here and and build it um happy to talk through how i would",
+              "start": 1134.799,
+              "duration": 5.681
+            },
+            {
+              "text": "approach that but yeah how would you like to to guide this conversation yeah yeah i i think now that um we're on the same page",
+              "start": 1140.48,
+              "duration": 6.72
+            },
+            {
+              "text": "about what the low intent traveler is and why we think this is a good place to make a",
+              "start": 1147.2,
+              "duration": 5.04
+            },
+            {
+              "text": "bet i'd love to hear where you would go from here yeah and so",
+              "start": 1152.24,
+              "duration": 6.88
+            },
+            {
+              "text": "this is one of those things where i think we should just be very crisp about what our hypothesis is and how we test",
+              "start": 1159.12,
+              "duration": 6.559
+            },
+            {
+              "text": "it before we kind of make any really big investments um",
+              "start": 1165.679,
+              "duration": 6.641
+            },
+            {
+              "text": "and so i think here's sort of what i'm thinking i think the the premise of this entire",
+              "start": 1172.32,
+              "duration": 6.719
+            },
+            {
+              "text": "strategy is predicated on a belief that if people visit airbnb more frequently",
+              "start": 1179.039,
+              "duration": 7.601
+            },
+            {
+              "text": "just to browse or do whatever sort of activity then when it does come time for them to",
+              "start": 1186.64,
+              "duration": 5.6
+            },
+            {
+              "text": "travel they'll book with us more often um and that's probably data airbnb has",
+              "start": 1192.24,
+              "duration": 5.679
+            },
+            {
+              "text": "already i think that's the sort of analysis i would do first which is specifically",
+              "start": 1197.919,
+              "duration": 5.521
+            },
+            {
+              "text": "for users who visit airbnb you know x number of times how does that",
+              "start": 1203.44,
+              "duration": 5.44
+            },
+            {
+              "text": "correlate with them booking with airbnb you know why weeks later",
+              "start": 1208.88,
+              "duration": 5.919
+            },
+            {
+              "text": "and do we see a positive correlation there because i think once we have that as a foundation then the question turns more into",
+              "start": 1214.799,
+              "duration": 6.801
+            },
+            {
+              "text": "strategy and product which is okay what can what services can we",
+              "start": 1221.6,
+              "duration": 5.04
+            },
+            {
+              "text": "provide to bring people um to airbnb um is that that logic track for you",
+              "start": 1226.64,
+              "duration": 6.08
+            },
+            {
+              "text": "yeah totally so i have three options i think in mind um",
+              "start": 1232.72,
+              "duration": 7.439
+            },
+            {
+              "text": "and i'll name them now and then we'll talk about how how we could think about prioritizing them i think",
+              "start": 1240.159,
+              "duration": 5.52
+            },
+            {
+              "text": "uh one is to kind of redesign the listings page to kind of feature the",
+              "start": 1245.679,
+              "duration": 5.441
+            },
+            {
+              "text": "hosts and their stories more so you know airbnb area has this feature where they designate super hosts and i'm curious if",
+              "start": 1251.12,
+              "duration": 8
+            },
+            {
+              "text": "highlighting personal stories or differentiate their listings more can you know not only attract more bookings",
+              "start": 1259.12,
+              "duration": 5.2
+            },
+            {
+              "text": "but give people a reason to come like i'm almost like read a blog and uh you know and then obviously people will",
+              "start": 1264.32,
+              "duration": 6.479
+            },
+            {
+              "text": "come visit airbnb more top of mind when they want to travel the second one",
+              "start": 1270.799,
+              "duration": 5.681
+            },
+            {
+              "text": "involves sort of social and user generated content i think this is where we could prompt",
+              "start": 1276.48,
+              "duration": 5.439
+            },
+            {
+              "text": "people after they visit to post photos of the really great trip they had um full disclosure",
+              "start": 1281.919,
+              "duration": 6.401
+            },
+            {
+              "text": "not a big fan of this one uh i think there could be a you know one i think it's a tall ask to ask people to kind of",
+              "start": 1288.32,
+              "duration": 6.479
+            },
+            {
+              "text": "post photos and things on another service uh besides the one they're using and i",
+              "start": 1294.799,
+              "duration": 5.601
+            },
+            {
+              "text": "think it gets a little bit into like unhealthy fomo aspects that kind of distracts from airbnbs or original ethos",
+              "start": 1300.4,
+              "duration": 7.279
+            },
+            {
+              "text": "um the third one i thought of was actually um",
+              "start": 1307.679,
+              "duration": 5.921
+            },
+            {
+              "text": "making their like add to wishlist experience richer and more personalized and more useful",
+              "start": 1313.6,
+              "duration": 5.28
+            },
+            {
+              "text": "um you can imagine something that's sort of like a pinterest experience that's tailored towards travel destinations and",
+              "start": 1318.88,
+              "duration": 6
+            },
+            {
+              "text": "activities um those are kind of like three high-level directions and i think they're pretty",
+              "start": 1324.88,
+              "duration": 6.32
+            },
+            {
+              "text": "substantial investments but i'll talk about which one i'll i think i want to tackle and then we can talk about the",
+              "start": 1331.2,
+              "duration": 5.68
+            },
+            {
+              "text": "mvp of that one um for which direction um and essentially i think my rough",
+              "start": 1336.88,
+              "duration": 6.32
+            },
+            {
+              "text": "prioritization framework is essentially of the options we have what's the expected impact towards",
+              "start": 1343.2,
+              "duration": 6.64
+            },
+            {
+              "text": "getting us to our good outcome as well as like what's the expected cost of delivering this outcome um i think for the sake of this",
+              "start": 1349.84,
+              "duration": 6.4
+            },
+            {
+              "text": "conversation i'm actually pretty fired up about the third option which is expanding the wishlist experience",
+              "start": 1356.24,
+              "duration": 7.12
+            },
+            {
+              "text": "and here's my reasoning uh what's nice about that the wishlist experience is that one that",
+              "start": 1363.36,
+              "duration": 7.199
+            },
+            {
+              "text": "experience already exists that functionality already exists and we're just extending it but two it's it's a non-dominant sort of user journey which",
+              "start": 1370.559,
+              "duration": 7.281
+            },
+            {
+              "text": "i think gives us a lot more flexibility to experiment with different experiences without",
+              "start": 1377.84,
+              "duration": 5.44
+            },
+            {
+              "text": "massively disrupting users and granted like i mentioned earlier building like a pinterest like",
+              "start": 1383.28,
+              "duration": 5.68
+            },
+            {
+              "text": "experience is a pretty heavy strategic investment you're retooling the entire wish list experience but",
+              "start": 1388.96,
+              "duration": 5.44
+            },
+            {
+              "text": "um we should talk about i think a little more scoped down mvp of how we would",
+              "start": 1394.4,
+              "duration": 5.68
+            },
+            {
+              "text": "build this i think um so would this be",
+              "start": 1400.08,
+              "duration": 5.28
+            },
+            {
+              "text": "uh like how would this be different than the social user generated one because",
+              "start": 1405.36,
+              "duration": 5.12
+            },
+            {
+              "text": "when when i'm hearing like oh it's like pinterest um does it i kind of have like the same",
+              "start": 1410.48,
+              "duration": 5.04
+            },
+            {
+              "text": "feed or what's the vision here oh yeah i'm sorry i should have clarified um",
+              "start": 1415.52,
+              "duration": 6
+            },
+            {
+              "text": "the the pinterest wouldn't be sort of like a generic it wouldn't be user generated content",
+              "start": 1421.52,
+              "duration": 6.88
+            },
+            {
+              "text": "it'd sort of be restructuring how um you could interact with kind of the",
+              "start": 1428.4,
+              "duration": 6.56
+            },
+            {
+              "text": "listings page so right now it's sort of static pages that show you something but it's like changing the ui in a way where",
+              "start": 1434.96,
+              "duration": 7.28
+            },
+            {
+              "text": "um you could show uh just make browsing i think i i think really the the strategy is just make",
+              "start": 1442.24,
+              "duration": 7.36
+            },
+            {
+              "text": "make airbnb more indexed towards like a browsing experience rather than a high intent search experience i guess so",
+              "start": 1449.6,
+              "duration": 7.199
+            },
+            {
+              "text": "did that make sense um i feel like if it's not clear how i'm paying the picture please please let me know yeah",
+              "start": 1456.799,
+              "duration": 5.041
+            },
+            {
+              "text": "so um maybe you can walk me through what this user experience would look like like if i'm a user and i come to the",
+              "start": 1461.84,
+              "duration": 5.92
+            },
+            {
+              "text": "website what do i see yeah i think when you come to the website um",
+              "start": 1467.76,
+              "duration": 7.12
+            },
+            {
+              "text": "instead of just offering you the ability to search um we call it the wishlist",
+              "start": 1474.88,
+              "duration": 5.679
+            },
+            {
+              "text": "experience and so you would still have the high intent like plan your booking travel here but off to the side you have oh",
+              "start": 1480.559,
+              "duration": 6.24
+            },
+            {
+              "text": "would you like to explore and when you hit the explorer you have like a sort of different experience",
+              "start": 1486.799,
+              "duration": 5.12
+            },
+            {
+              "text": "that's like i would imagine like much more immersive um you could scroll through kind of like",
+              "start": 1491.919,
+              "duration": 5.441
+            },
+            {
+              "text": "beautiful listings and destinations it in my head it kind of looks like a uh inspo page almost",
+              "start": 1497.36,
+              "duration": 6.88
+            },
+            {
+              "text": "um to really kind of play up the like this is you have one part of the app which is the core app which is like this",
+              "start": 1504.24,
+              "duration": 5.76
+            },
+            {
+              "text": "is where you book and then one part of the app which is um this is where you",
+              "start": 1510,
+              "duration": 5.279
+            },
+            {
+              "text": "kind of can browse and explore and find inspiration for your next trip and all the wishlist and tooling",
+              "start": 1515.279,
+              "duration": 5.921
+            },
+            {
+              "text": "involved with that yeah thank you for having me clarify yeah yeah makes a lot of sense there so",
+              "start": 1521.2,
+              "duration": 5.52
+            },
+            {
+              "text": "um yeah i mean i think this sounds interesting and i'm wondering maybe in the few minutes we have remaining um do",
+              "start": 1526.72,
+              "duration": 5.839
+            },
+            {
+              "text": "you have any sort of launch strategy that you would keep in mind when you're placing this huge bet",
+              "start": 1532.559,
+              "duration": 5.841
+            },
+            {
+              "text": "yeah i would not just launch um a this like right away i think we'd have",
+              "start": 1538.4,
+              "duration": 6.399
+            },
+            {
+              "text": "to scope it down a little more um i think the one i'd have in mind too is",
+              "start": 1544.799,
+              "duration": 6
+            },
+            {
+              "text": "like we we have some some uh way of highlighting",
+              "start": 1550.799,
+              "duration": 5.601
+            },
+            {
+              "text": "that there is like a different explore experience um you know when uh oh actually no i think",
+              "start": 1556.4,
+              "duration": 6.24
+            },
+            {
+              "text": "i think fundamentally we we want to introduce users to the fact that we are um",
+              "start": 1562.64,
+              "duration": 5.6
+            },
+            {
+              "text": "gonna invest in an exploration experience so actually this seems counterintuitive but i think i would actually send out a newsletter to",
+              "start": 1568.24,
+              "duration": 6.799
+            },
+            {
+              "text": "inactive users highlighting here are some of the unique experiences we have on airbnb",
+              "start": 1575.039,
+              "duration": 5.76
+            },
+            {
+              "text": "um and that's kind of nice because i think most the engineering work would actually be sending up the logging and tweaking some",
+              "start": 1580.799,
+              "duration": 6.641
+            },
+            {
+              "text": "of airbnb's email outreach infrastructure we have the marketing team generate some content",
+              "start": 1587.44,
+              "duration": 5.92
+            },
+            {
+              "text": "and i don't think the content needs to be personalized to each user necessarily either but it should highlight like here",
+              "start": 1593.36,
+              "duration": 6.08
+            },
+            {
+              "text": "are some really cool experiences that's unique to airbnb and we could and i think our success",
+              "start": 1599.44,
+              "duration": 5.359
+            },
+            {
+              "text": "metric is how often are people clicking on this newsletter like is this is the prospect",
+              "start": 1604.799,
+              "duration": 6.401
+            },
+            {
+              "text": "of exploring more listings and proactive suggestion of exploring more listings um",
+              "start": 1611.2,
+              "duration": 8.24
+            },
+            {
+              "text": "attractive and appealing um and then from there once they click on the listing we could actually monitor",
+              "start": 1619.44,
+              "duration": 5.839
+            },
+            {
+              "text": "like how do users navigate around airbnb after they click on it when they click on it and you show the",
+              "start": 1625.279,
+              "duration": 6.241
+            },
+            {
+              "text": "listing do they then search for related trips and experiences i think then maybe that gives us",
+              "start": 1631.52,
+              "duration": 7.519
+            },
+            {
+              "text": "some signal on oh maybe proactive suggestions is is a good investment um does the newsletter prompt them to kind",
+              "start": 1639.039,
+              "duration": 7.041
+            },
+            {
+              "text": "of favorite that listing and add to their wish list then it's oh maybe we should invest a little more in the wishlist experience",
+              "start": 1646.08,
+              "duration": 6.56
+            },
+            {
+              "text": "um so to summarize i think my recommendation would be start small with a newsletter that goes",
+              "start": 1652.64,
+              "duration": 5.519
+            },
+            {
+              "text": "out to existing users see how engagement with that newsletter drives engagement with airbnb",
+              "start": 1658.159,
+              "duration": 6
+            },
+            {
+              "text": "see how engagement with airbnb leads to an increase in kind of night stayed",
+              "start": 1664.159,
+              "duration": 6.561
+            },
+            {
+              "text": "per per user per year which is our north star metric and then understand",
+              "start": 1670.72,
+              "duration": 5.6
+            },
+            {
+              "text": "how users behave after they tap this newsletter and arrive at the airbnb page and that could give a signal",
+              "start": 1676.32,
+              "duration": 6.719
+            },
+            {
+              "text": "on where to invest more in a more exploratory browsy experience",
+              "start": 1683.039,
+              "duration": 5.921
+            },
+            {
+              "text": "yeah it makes sense i can definitely see how this can help people inspire some of those more passive users",
+              "start": 1688.96,
+              "duration": 5.599
+            },
+            {
+              "text": "to explore more um cool i i think this is good for our mock interview here so i'll pause here um and i'll dive into a",
+              "start": 1694.559,
+              "duration": 7.041
+            },
+            {
+              "text": "little bit of feedback and maybe at the end you can give the viewers some advice on how they could tackle similar product",
+              "start": 1701.6,
+              "duration": 6.64
+            },
+            {
+              "text": "strategy questions so i really liked how you started off with",
+              "start": 1708.24,
+              "duration": 5.76
+            },
+            {
+              "text": "defining success and you talked about not only like this user segmentation about like high intent low intent",
+              "start": 1714,
+              "duration": 6.399
+            },
+            {
+              "text": "business leisure but you also called out all these other segments that you could have segmented by like such as age um so",
+              "start": 1720.399,
+              "duration": 7.28
+            },
+            {
+              "text": "i thought that was really good to hear some of your other thinking and why you didn't pursue some of the other paths",
+              "start": 1727.679,
+              "duration": 6.88
+            },
+            {
+              "text": "um i i think i specifically went out of my way to try to poke holes and try to give you a",
+              "start": 1734.559,
+              "duration": 5.84
+            },
+            {
+              "text": "lot of pushback and i believe you handled that pretty gracefully i think there were like two or three places",
+              "start": 1740.399,
+              "duration": 5.921
+            },
+            {
+              "text": "where i really like pushed you and um it definitely shows that you really",
+              "start": 1746.32,
+              "duration": 5.04
+            },
+            {
+              "text": "believe in what you're talking about so um always good to have that as a trait in",
+              "start": 1751.36,
+              "duration": 5.76
+            },
+            {
+              "text": "an interview also i think it just shows in your",
+              "start": 1757.12,
+              "duration": 5.84
+            },
+            {
+              "text": "in your answer that you know even though you yourself you're not a big traveler you're able to take this travel question",
+              "start": 1762.96,
+              "duration": 5.52
+            },
+            {
+              "text": "and add substantial color to it um and and kind of put your own twist on it in the sense that uh you know like",
+              "start": 1768.48,
+              "duration": 6.24
+            },
+            {
+              "text": "even at the end like i could tell that you know this could be a nice product that people could use to kind of inspire themselves to",
+              "start": 1774.72,
+              "duration": 6.24
+            },
+            {
+              "text": "travel so um all in all thanks for your time for answering this product strategy question and if you",
+              "start": 1780.96,
+              "duration": 6.88
+            },
+            {
+              "text": "have any tips for the audience i think that would be awesome for us to hear that right now yeah and i think for me",
+              "start": 1787.84,
+              "duration": 7.12
+            },
+            {
+              "text": "one strategy questions are really hard and i've always been candid like i don't",
+              "start": 1794.96,
+              "duration": 5.52
+            },
+            {
+              "text": "know even if that is a great strategy the one articulated but i think the interview advice that i've received in",
+              "start": 1800.48,
+              "duration": 6.16
+            },
+            {
+              "text": "the past that's been really helpful is they're not looking for you to be quote unquote right in the 45 minutes you have",
+              "start": 1806.64,
+              "duration": 7.84
+            },
+            {
+              "text": "they want to know like is this someone that's a principal thinker can they get feedback can i see them actually having",
+              "start": 1814.48,
+              "duration": 6.72
+            },
+            {
+              "text": "this conversation with them as like a colleague so i actually really appreciate your feedback kevin because it was like oh no",
+              "start": 1821.2,
+              "duration": 6.479
+            },
+            {
+              "text": "this does change my thinking oh i didn't articulate that very well um i think the",
+              "start": 1827.679,
+              "duration": 5.12
+            },
+            {
+              "text": "second two was like i know interviews are daunting but try to have fun with it too because you know this i meant",
+              "start": 1832.799,
+              "duration": 6.161
+            },
+            {
+              "text": "putting yourselves in the interview shoes they have a ton of work they gotta do they have to do 45 minutes of this then",
+              "start": 1838.96,
+              "duration": 5.839
+            },
+            {
+              "text": "they have to like write up the feedback like do as much as you can be high energy and make that 45 minutes enjoyable for them",
+              "start": 1844.799,
+              "duration": 6.961
+            },
+            {
+              "text": "um and you know it's surprisingly effective but um yeah i'm rambling but yeah kevin this",
+              "start": 1851.76,
+              "duration": 5.919
+            },
+            {
+              "text": "was i had fun i hope you had fun absolutely and i think this is really valuable for the users so for the",
+              "start": 1857.679,
+              "duration": 5.36
+            },
+            {
+              "text": "viewers who are watching at home this is definitely really good advice i think very similar to a lot of other",
+              "start": 1863.039,
+              "duration": 5.441
+            },
+            {
+              "text": "interviews it's not about the specific answer it doesn't matter if the question is like design an alarm clock for the",
+              "start": 1868.48,
+              "duration": 6.079
+            },
+            {
+              "text": "elderly or whatever it's not the specific answer it's more about the conversation you have with the interviewer and how you get to your",
+              "start": 1874.559,
+              "duration": 6.321
+            },
+            {
+              "text": "approach so yeah good luck with your upcoming pm interview and hope this mock",
+              "start": 1880.88,
+              "duration": 5.279
+            },
+            {
+              "text": "interview was helpful thanks thanks so much for watching don't forget to hit the like and subscribe buttons",
+              "start": 1886.159,
+              "duration": 6.4
+            },
+            {
+              "text": "below to let us know that this video is valuable for you and of course check out hundreds more videos just like this at",
+              "start": 1892.559,
+              "duration": 7.72
+            },
+            {
+              "text": "tryexponent.com thanks for watching and good luck on your upcoming interview",
+              "start": 1900.279,
+              "duration": 6.879
+            },
+            {
+              "text": "[Music]",
+              "start": 1909.14,
+              "duration": 4.669
+            }
+          ],
+          "available_languages": [
+            {
+              "name": "English (auto-generated)",
+              "lang": "en"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Get Video Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Structure Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "PM Interview Categorizer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "processTranscript": {
+      "main": [
+        [
+          {
+            "node": "cleanedTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cleanedTranscript": {
+      "main": [
+        [
+          {
+            "node": "PM Interview Categorizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PM Interview Categorizer": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Transcript": {
+      "main": [
+        [
+          {
+            "node": "processTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Information": {
+      "main": [
+        [
+          {
+            "node": "Extract Video Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Video Description": {
+      "main": [
+        [
+          {
+            "node": "Get Video Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Store in Pinecone",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Store in Pinecone",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Video Description",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "PM Interview Categorizer",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "JSON Structure Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Store in Pinecone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Interview Guide Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CV Retriever": {
+      "ai_tool": [
+        [
+          {
+            "node": "Interview Guide Generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI3": {
+      "ai_embedding": [
+        [
+          {
+            "node": "CV Retriever",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Mock Interview Retriever",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock Interview Retriever": {
+      "ai_tool": [
+        [
+          {
+            "node": "Interview Guide Generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere1": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Mock Interview Retriever",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interview Guide Generator": {
+      "main": [
+        [
+          {
+            "node": "Interview Conductor Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interview Conductor Agent": {
+      "main": [
+        []
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Interview Guide Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Interview Conductor Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shared Interview Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Interview Guide Generator",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Interview Conductor Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Interview Guide Generator",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Interview Conductor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b832d5fa-f108-4935-b85a-cbe619c67369",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6114df9fa60673927e640f52a642006ef4b43f3523add3de0115435b93c3887b"
+  },
+  "id": "h0THIrUQQmRGyxdb",
+  "tags": []
+}
