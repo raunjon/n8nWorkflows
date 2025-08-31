@@ -154,11 +154,17 @@ Use Case: Monitor public opinion and sentiment about products, brands, or topics
 ## 🛠️ Technical Stack
 
 Platform: n8n workflow automation
+
 LLM: OpenAI GPT-4 models
+
 Vector Database: Pinecone
+
 Storage: Google Sheets, PostgreSQL
+
 AI Features: Embeddings, Reranking (Cohere), Contextual Retrieval
+
 Integrations: YouTube, Reddit, Google Drive, WhatsApp
+
 
 ## 📋 Prerequisites
 
